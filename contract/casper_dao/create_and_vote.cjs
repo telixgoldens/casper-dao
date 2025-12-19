@@ -6,7 +6,7 @@ const NODE_URL = process.env.NODE_URL || "http://65.109.83.79:7777/rpc";
 const NETWORK_NAME = process.env.NETWORK_NAME || "casper-test";
 const KEY_PATH = process.env.KEY_PATH || "C:/Users/HP/Desktop/casperkeys/secret_key.pem";
 
-const DAO_CONTRACT_HASH = process.argv[2] || process.env.DAO_CONTRACT_HASH || 'hash-1674e205910451b4b211592cf0dcc785f5552a7187fbee18567cca62ce6d0994';
+const DAO_CONTRACT_HASH = process.argv[2] || process.env.DAO_CONTRACT_HASH || 'hash-ee3632e07418650bb1fa4ba56739c66deef5debad02536aeb10df4a533a0e667';
 
 async function loadKeys() {
   try { return Keys.Ed25519.loadKeyPairFromPrivateFile(KEY_PATH); }

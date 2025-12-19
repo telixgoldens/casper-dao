@@ -71,25 +71,25 @@ pub extern "C" fn vote() {
         runtime::revert(ApiError::User(1)); 
     }
 
-    let daos_dict = runtime::get_key(DICT_DAOS).unwrap().into_uref().unwrap();
-    let token_key: Key = storage::dictionary_get(daos_dict, &dao_id.to_string())
-        .unwrap_or_revert()
-        .unwrap_or_revert();
+    // let daos_dict = runtime::get_key(DICT_DAOS).unwrap().into_uref().unwrap();
+    // let token_key: Key = storage::dictionary_get(daos_dict, &dao_id.to_string())
+    //     .unwrap_or_revert()
+    //     .unwrap_or_revert();
 
-    let token_hash = match token_key {
-        Key::Hash(h) => ContractHash::new(h),
-        _ => runtime::revert(ApiError::User(2)),
-    };
+    // let token_hash = match token_key {
+    //     Key::Hash(h) => ContractHash::new(h),
+    //     _ => runtime::revert(ApiError::User(2)),
+    // };
 
-    let balance: U256 = runtime::call_contract(
-        token_hash,
-        "balance_of",
-        runtime_args! { "address" => voter },
-    );
+    // let balance: U256 = runtime::call_contract(
+    //     token_hash,
+    //     "balance_of",
+    //     runtime_args! { "address" => voter },
+    // );
 
-    if balance == U256::zero() {
-        runtime::revert(ApiError::User(3)); 
-    }
+    // if balance == U256::zero() {
+    //     runtime::revert(ApiError::User(3)); 
+    // }
 
     storage::dictionary_put(votes_dict, &vote_key, true);
     
