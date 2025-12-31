@@ -10,7 +10,7 @@ const KEY_PATH = process.env.KEY_PATH || "C:/Users/HP/Desktop/casperkeys/secret_
 // 1) CLI arg: `node init_v2.cjs <contract-hash>`
 // 2) env var: CONTRACT_HASH
 // 3) hard-coded below (fallback) -- leave as placeholder to trigger auto-detect
-let CONTRACT_HASH = process.argv[2] || process.env.CONTRACT_HASH || "hash-ee3632e07418650bb1fa4ba56739c66deef5debad02536aeb10df4a533a0e667";
+let CONTRACT_HASH = process.argv[2] || process.env.CONTRACT_HASH || "hash-5d1ddfd92cf74a044b398305788fdcb913feee8f2be6fa845684fb34e9d02709";
 
 async function loadKeys() {
   try {

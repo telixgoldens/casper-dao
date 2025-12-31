@@ -6,7 +6,9 @@ const NODE_URL = process.env.NODE_URL || "http://65.109.83.79:7777/rpc";
 const NETWORK_NAME = process.env.NETWORK_NAME || "casper-test";
 const KEY_PATH = process.env.KEY_PATH || "C:/Users/HP/Desktop/casperkeys/secret_key.pem";
 
-const DAO_CONTRACT_HASH = process.argv[2] || process.env.DAO_CONTRACT_HASH || 'hash-ee3632e07418650bb1fa4ba56739c66deef5debad02536aeb10df4a533a0e667';
+const DAO_CONTRACT_HASH = process.argv[2] || process.env.DAO_CONTRACT_HASH || 'hash-5d1ddfd92cf74a044b398305788fdcb913feee8f2be6fa845684fb34e9d02709';
+// Optional token contract hash for voting as second CLI arg or env var. If omitted, the DAO contract hash is used.
+const TOKEN_CONTRACT_HASH = process.argv[3] || process.env.TOKEN_CONTRACT_HASH || 'hash-3af231b810cdff2158f181d85bf78cf16df93a28ba2d4056c3a6f67e9a0386ae';
 
 async function loadKeys() {
   try { return Keys.Ed25519.loadKeyPairFromPrivateFile(KEY_PATH); }
@@ -39,10 +41,11 @@ async function main() {
   console.log('\n--- create_dao ---');
   const params = new DeployUtil.DeployParams(keys.publicKey, NETWORK_NAME);
   const name = 'Test DAO from script ' + Date.now();
-  const rawHash = DAO_CONTRACT_HASH.startsWith('hash-') ? DAO_CONTRACT_HASH.slice(5) : DAO_CONTRACT_HASH.replace(/^0x/, '');
+  const rawHash = TOKEN_CONTRACT_HASH.startsWith('hash-') ? TOKEN_CONTRACT_HASH.slice(5) : TOKEN_CONTRACT_HASH.replace(/^0x/, '');
   const keyHash = '0x' + rawHash;
   const tokenKey = KeyValue.fromHash(keyHash);
-  const args = RuntimeArgs.fromMap({ name: CLValue.string(name), token_address: CLValue.key(tokenKey) });
+  const tokenTypeArg = process.argv[4] || process.env.TOKEN_TYPE || 'u512_owner';
+  const args = RuntimeArgs.fromMap({ name: CLValue.string(name), token_address: CLValue.key(tokenKey), token_type: CLValue.string(tokenTypeArg) });
 
   const session = DeployUtil.ExecutableDeployItem.newStoredContractByHash(toHashBytes(DAO_CONTRACT_HASH), 'create_dao', args);
   const payment = DeployUtil.standardPayment(300000000000);
