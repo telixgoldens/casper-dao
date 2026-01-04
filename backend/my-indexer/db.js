@@ -1,17 +1,16 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Connect to a file-based database (creates 'votes.db' if missing)
+
 const dbPath = path.resolve(__dirname, 'votes.db');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('❌ Could not connect to SQLite database', err);
+    console.error(' Could not connect to SQLite database', err);
   } else {
-    console.log('✅ Connected to SQLite database');
+    console.log('Connected to SQLite database');
   }
 });
 
-// Create the Votes Table (SQLite syntax)
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS votes (

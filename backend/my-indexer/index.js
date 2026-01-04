@@ -19,14 +19,16 @@ const {
   DeployHeader,
   StoredContractByHash,
   ModuleBytes,
-  HexBytes,
   Hash,
-  Approval
+  Approval,
+  Timestamp,
+  Duration
 } = CasperSDK;
 
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
+const crypto = require('crypto');
 
 const NODE_URL = process.env.NODE_URL || "http://65.109.83.79:7777/rpc";
 const NETWORK_NAME = "casper-test";
@@ -41,11 +43,10 @@ const privateKey = PrivateKey.fromPem(privateKeyPem, KeyAlgorithm.ED25519);
 const publicKey = privateKey.publicKey;
 
 console.log('✅ Loaded public key:', publicKey.toHex());
-console.log('Private key methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(privateKey)));
 
 // Helper function to send deploy via RPC
-async function putDeployViaRPC(signedDeploy) {
-  const deployJson = signedDeploy.toJson ? signedDeploy.toJson() : JSON.parse(JSON.stringify(signedDeploy));
+async function putDeployViaRPC(deploy) {
+  const deployJson = deploy.toJson ? deploy.toJson() : JSON.parse(JSON.stringify(deploy));
   
   const response = await fetch(NODE_URL, {
     method: 'POST',
@@ -152,8 +153,8 @@ app.post("/deploy-create-dao", async (req, res) => {
     const deploy = new Deploy();
     deploy.header = new DeployHeader();
     deploy.header.account = publicKey;
-    deploy.header.timestamp = Date.now();
-    deploy.header.ttl = 1800000;
+    deploy.header.timestamp = new Timestamp(new Date()); // Pass Date object
+    deploy.header.ttl = new Duration(1800000); // milliseconds
     deploy.header.gasPrice = 1;
     deploy.header.chainName = NETWORK_NAME;
     deploy.header.dependencies = [];
@@ -167,36 +168,28 @@ app.post("/deploy-create-dao", async (req, res) => {
     deploy.session = session;
     deploy.approvals = [];
 
-    console.log('Deploy structure created, attempting to sign manually...');
+    console.log('Deploy structure created, attempting to sign...');
 
-    // Manual signing approach
-    try {
-      // Get deploy bytes for signing
-      const deployBytes = deploy.toBytes();
-      console.log('Deploy serialized to bytes, length:', deployBytes.length);
-      
-      // Sign with private key
-      const signature = privateKey.sign(deployBytes);
-      console.log('Signature created, length:', signature.length);
-      
-      // Create approval
-      const approval = new Approval();
-      approval.signer = publicKey;
-      approval.signature = signature;
-      
-      deploy.approvals = [approval];
-      
-      // Compute deploy hash from the bytes
-      const crypto = require('crypto');
-      const hashBytes = crypto.createHash('blake2b256').update(deployBytes).digest();
-      deploy.hash = new Hash(hashBytes);
-      
-      console.log('Deploy signed and hashed manually');
-      
-    } catch (signErr) {
-      console.error('Manual signing error:', signErr);
-      throw signErr;
-    }
+    // Get deploy bytes for signing
+    const deployBytes = deploy.toBytes();
+    console.log('✅ Deploy serialized to bytes, length:', deployBytes.length);
+    
+    // Sign with private key
+    const signature = privateKey.sign(deployBytes);
+    console.log('✅ Signature created');
+    
+    // Create approval
+    const approval = new Approval();
+    approval.signer = publicKey;
+    approval.signature = signature;
+    
+    deploy.approvals = [approval];
+    
+    // Compute deploy hash from the bytes
+    const hashBytes = crypto.createHash('blake2b256').update(deployBytes).digest();
+    deploy.hash = new Hash(hashBytes);
+    
+    console.log('✅ Deploy signed and hashed');
 
     // Send deploy via RPC
     const deployHash = await putDeployViaRPC(deploy);
@@ -244,8 +237,8 @@ app.post("/deploy-vote", async (req, res) => {
     const deploy = new Deploy();
     deploy.header = new DeployHeader();
     deploy.header.account = publicKey;
-    deploy.header.timestamp = Date.now();
-    deploy.header.ttl = 1800000;
+    deploy.header.timestamp = new Timestamp(new Date()); // Pass Date object
+    deploy.header.ttl = new Duration(1800000);
     deploy.header.gasPrice = 1;
     deploy.header.chainName = NETWORK_NAME;
     deploy.header.dependencies = [];
@@ -258,7 +251,6 @@ app.post("/deploy-vote", async (req, res) => {
     deploy.session = session;
     deploy.approvals = [];
 
-    // Manual signing
     const deployBytes = deploy.toBytes();
     const signature = privateKey.sign(deployBytes);
     
@@ -268,7 +260,6 @@ app.post("/deploy-vote", async (req, res) => {
     
     deploy.approvals = [approval];
     
-    const crypto = require('crypto');
     const hashBytes = crypto.createHash('blake2b256').update(deployBytes).digest();
     deploy.hash = new Hash(hashBytes);
 
