@@ -1,9 +1,6 @@
 import React from 'react';
 import { FaGhost } from 'react-icons/fa';
-import GHOST_IMAGE_URL from "../assets/ghostjpg.png"
-
-
-// This looks for the image in your public folder
+import Ghostimg from "../assets/ghostjpg.png"
 
 
 export default function LandingPage({ onConnect }) {
@@ -12,61 +9,57 @@ export default function LandingPage({ onConnect }) {
     <div className="min-h-screen bg-nebula bg-grid-texture relative flex flex-col">
       
       {/* ================= NAVBAR ================= */}
-      <nav className="w-full max-w-7xl mx-auto px-6 py-8 flex justify-between items-center z-50 relative">
+      <nav className="d-flex justify-content-between container">
         {/* Logo */}
-        <div className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white">
+        <div className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white ghost-name">
           <FaGhost className="text-cyan-400" />
-          <span>Casper</span>
+          <span>Casper Dao</span>
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex gap-8 text-sm font-medium text-slate-300">
+        <div className=" d-flex gap-5 text-sm font-medium text-slate-300 ghost-map">
           {['Products', 'Patents', 'Resources', 'Contacts'].map((item) => (
-            <a key={item} href="#" className="hover:text-cyan-400 transition-colors">
+            <a key={item} href="#" className="hover:text-cyan-400 text-white text-decoration-none">
               {item}
             </a>
           ))}
         </div>
 
         {/* Buttons */}
-        <div className="flex items-center gap-6 nav-right">
-          <button className="hidden md:block text-slate-300 hover:text-white text-sm font-medium">
-            Login
-          </button>
+        <div className="flex items-centerbg-cyan-500/10 gap-6 nav-right">
+          
           <button 
             onClick={onConnect}
-            className="px-6 py-2.5 rounded-full border border-cyan-500/50 bg-cyan-500/10 text-cyan-400 text-sm font-bold hover:bg-cyan-500 hover:text-black transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)]"
-          >
-            Sign Up
+            className=" rounded-full  hover:shadow-[0_0_40px_rgba(6,182,212,0.4)] nav-right-connect" >
+            Connect Wallet
           </button>
         </div>
       </nav>
 
       {/* ================= HERO SECTION ================= */}
-      <main className="flex-1 w-full z-10">
-        <div className="hero-container">
+      <main className="container ">
           <div className="hero-inner">
 
         {/* --- LEFT COLUMN: TEXT --- */}
-        <div className="hero-left w-full space-y-8 pt-6 lg:pt-0">
+        <div className="hero-left ">
           <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight text-white">
             UNLEASH THE FUTURE. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">
+            <span className=" bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 hero-left-text ">
               BUILD ON CASPER.
             </span>
           </h1>
 
-          <p className="text-slate-400 text-lg md:text-xl max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">
-            Scalable. Secure. Upgradeable. The enterprise-grade blockchain for the next generation of DAOs and dApps.
+          <p className="">
+            Engineered for limitless scalability, uncompromised security, and seamless upgradeability. The definitive enterprise-grade foundation empowering the next generation of DAOs and dApps. Future-proof your vision on a network built to evolve with the speed of innovation.
           </p>
 
             <div className="flex justify-start pt-4">
             <button 
                 onClick={onConnect}
-                className="group relative px-8 py-4 bg-transparent overflow-hidden rounded-full border border-cyan-500 text-white font-bold tracking-widest uppercase flex items-center gap-3 transition-all hover:shadow-[0_0_40px_rgba(6,182,212,0.4)] hover:bg-cyan-500/10"
+                className="group relative px-3 py-4 overflow-hidden rounded-full border border-cyan-500 text-white font-bold tracking-widest uppercase flex items-center gap-3 transition-all hover:shadow-[0_0_40px_rgba(6,182,212,0.4)] hover:bg-cyan-500/10 ghost-create"
             >
-                <FaGhost className="text-cyan-400 text-xl group-hover:text-white transition-colors" />
-                <span>Start Building</span>
+                <FaGhost className="text-cyan-400 text-xl group-hover:text-white" />
+                <span className='ghost-create-text'>Create dao </span>
             </button>
           </div>
         </div>
@@ -76,7 +69,7 @@ export default function LandingPage({ onConnect }) {
             <div className="relative w-full max-w-[620px] flex items-center justify-center">
               {/* The Image Asset */}
               <img 
-                src={GHOST_IMAGE_URL} 
+                src={Ghostimg} 
                 alt="Casper Ghost Crystal" 
                 className="relative z-10 w-full h-auto max-h-[520px] object-contain no-glow"
               />
@@ -84,16 +77,7 @@ export default function LandingPage({ onConnect }) {
           </div>
 
           </div>
-          </div>
           </main>
-
-      {/* Footer / Scroll Indicator */}
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center opacity-40">
-        <div className="flex flex-col items-center gap-2">
-            <div className="w-[1px] h-16 bg-gradient-to-b from-cyan-500 to-transparent" />
-            <span className="text-[10px] tracking-[0.4em] text-cyan-400 uppercase">Scroll</span>
-        </div>
-      </div>
 
     </div>
   );

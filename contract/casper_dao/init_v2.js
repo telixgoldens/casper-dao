@@ -12,7 +12,7 @@ const NETWORK_NAME = "casper-test";
 const KEY_PATH = "C:/Users/HP/Desktop/casperkeys/secret_key.pem"; 
 
 // ⚠️ PASTE YOUR NEW CONTRACT HASH HERE (Looks like "hash-8d3c...")
-const CONTRACT_HASH = "hash-1674e205910451b4b211592cf0dcc785f5552a7187fbee18567cca62ce6d0994"; 
+const CONTRACT_HASH = "hash-e4effb82c8c163e74a00d1d090482403b3e673021efca8c7654367d8819929a8"; 
 
 const init = async () => {
   const client = new CasperClient(NODE_URL);

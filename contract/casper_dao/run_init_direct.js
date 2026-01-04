@@ -3,7 +3,7 @@ const { CasperClient, DeployUtil, RuntimeArgs, Keys } = require('casper-js-sdk')
 const NODE_URL = process.env.NODE_URL || "https://node.testnet.casper.network/rpc";
 const NETWORK_NAME = process.env.NETWORK_NAME || "casper-test";
 const KEY_PATH = process.env.KEY_PATH || "C:/Users/HP/Desktop/casperkeys/secret_key.pem";
-const CONTRACT_HASH = process.argv[2] || process.env.CONTRACT_HASH || "contract-5d1ddfd92cf74a044b398305788fdcb913feee8f2be6fa845684fb34e9d02709";
+const CONTRACT_HASH = process.argv[2] || process.env.DAO_CONTRACT_HASH || "contract-e4effb82c8c163e74a00d1d090482403b3e673021efca8c7654367d8819929a8";
 
 async function loadKeys() {
   try { return Keys.Ed25519.loadKeyPairFromPrivateFile(KEY_PATH); }

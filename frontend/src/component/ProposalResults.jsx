@@ -6,29 +6,26 @@ export default function ProposalResults({ daoId, proposalId }) {
   const [votes, setVotes] = useState([]);
   const [stats, setStats] = useState(null);
 
-  // Poll the API every 3 seconds for live updates
   useEffect(() => {
     const fetchData = async () => {
-      // 1. Get the list of individual votes
       const voteRes = await fetch(`${API_URL}/votes/${proposalId}`);
       const voteData = await voteRes.json();
       setVotes(voteData.votes);
 
-      // 2. Get the aggregated totals for the chart
       const statRes = await fetch(`${API_URL}/stats/${daoId}/${proposalId}`);
       const statData = await statRes.json();
       setStats(statData);
     };
 
-    fetchData(); // Initial fetch
-    const interval = setInterval(fetchData, 3000); // Polling
+    fetchData(); 
+    const interval = setInterval(fetchData, 3000); 
 
     return () => clearInterval(interval);
   }, [daoId, proposalId]);
 
   return (
     <div className="p-4 border rounded shadow">
-      <h3>Live Results 🔴</h3>
+      <h3>Live Results </h3>
       <div className="mt-4">
         <h4>Recent Votes (Blockchain Explorer)</h4>
         <ul>

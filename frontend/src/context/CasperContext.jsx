@@ -6,13 +6,11 @@ export const CasperProvider = ({ children }) => {
   const [activeKey, setActiveKey] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  // Helper: Safely get the provider
   const getCasperProvider = () => {
     if (typeof window === "undefined") return null;
     return window.CasperWalletProvider;
   };
 
-  // 1. Connect Function
   const connectWallet = async () => {
     const provider = getCasperProvider();
     
@@ -23,9 +21,9 @@ export const CasperProvider = ({ children }) => {
     }
 
     try {
-      console.log("🔌 Attempting to connect... provider (raw):", provider);
+      console.log("Attempting to connect... provider (raw):", provider);
 
-      // If provider is a function (some injections are factory functions), try to call it safely
+      
       let prov = provider;
       if (typeof provider === 'function') {
         try {
@@ -37,11 +35,9 @@ export const CasperProvider = ({ children }) => {
         }
       }
 
-      // Inspect more thoroughly (non-enumerable props too) for debugging
       const keys = Object.keys(prov || {}).length ? Object.keys(prov) : Object.getOwnPropertyNames(prov || {});
       console.log('Provider inspected keys:', keys);
 
-      // Try several possible connection APIs in order of likelihood
       let connected = false;
 
       if (prov && typeof prov.requestConnection === 'function') {
@@ -65,12 +61,10 @@ export const CasperProvider = ({ children }) => {
           }
         }
       } else {
-        // Last resort: some providers hide methods — try to sniff common names
         console.warn('No known connection method on provider. Provider keys:', keys);
       }
 
       if (connected) {
-        // Try multiple ways to obtain the active public key
         let account = null;
         if (prov && typeof prov.getActivePublicKey === 'function') {
           account = await prov.getActivePublicKey();
@@ -80,20 +74,18 @@ export const CasperProvider = ({ children }) => {
           account = prov.activeKey;
         }
 
-        console.log('✅ Connected. Active key:', account);
+        console.log('Connected. Active key:', account);
         setActiveKey(account);
         setIsConnected(true);
       } else {
         throw new Error('Provider did not report a successful connection');
       }
     } catch (err) {
-      console.error("❌ Connection Failed:", err);
-      // Fallback for older extension versions or different API shapes
+      console.error("Connection Failed:", err);
       alert("Connection failed. Check console for details.");
     }
   };
 
-  // 2. Disconnect Function
   const disconnectWallet = async () => {
     const provider = getCasperProvider();
     if (provider) {
@@ -107,19 +99,16 @@ export const CasperProvider = ({ children }) => {
     }
   };
 
-  // 3. Auto-Connect & Event Listeners
   useEffect(() => {
     const checkConnection = async () => {
       const provider = getCasperProvider();
       
-      // Wait slightly for injection
       if (!provider) {
-        console.log("⏳ Wallet provider not found immediately...");
+        console.log("Wallet provider not found immediately...");
         return;
       }
 
       try {
-          // Some providers expose `isConnected()` as a function, others don't.
           let connected = false;
 
           if (typeof provider.isConnected === 'function') {
@@ -132,7 +121,7 @@ export const CasperProvider = ({ children }) => {
           } else if (typeof provider.isConnected === 'boolean') {
             connected = provider.isConnected;
           } else {
-            // Fallback: try to get the active public key directly
+
             try {
               const account = await provider.getActivePublicKey();
               if (account) {
@@ -160,21 +149,18 @@ export const CasperProvider = ({ children }) => {
         }
     };
 
-    // Delay check to ensure extension is loaded
     const timer = setTimeout(checkConnection, 1000);
 
-    // Event Listeners for Account Changes
     const handleAccountChange = (event) => {
-        // The event structure can vary; we try to grab the key safely
         let newKey = null;
         if (event.detail && typeof event.detail === 'string') {
-             newKey = event.detail; // Sometimes it's just the string
+             newKey = event.detail; 
         } else if (event.detail && event.detail.activeKey) {
-             newKey = event.detail.activeKey; // Sometimes it's an object
+             newKey = event.detail.activeKey; 
         }
 
         if (newKey) {
-            console.log("🔄 Account Changed:", newKey);
+            console.log("Account Changed:", newKey);
             setActiveKey(newKey);
             setIsConnected(true);
         } else {
@@ -184,12 +170,11 @@ export const CasperProvider = ({ children }) => {
     };
 
     const handleDisconnect = () => {
-        console.log("🔌 Disconnected event received");
+        console.log("Disconnected event received");
         setActiveKey(null);
         setIsConnected(false);
     };
     
-    // Listen for standard events
     window.addEventListener('casper:activeKeyChanged', handleAccountChange);
     window.addEventListener('casper:disconnected', handleDisconnect);
 

@@ -2,7 +2,7 @@ const fs = require('fs');
 const { CasperClient, DeployUtil, RuntimeArgs, Keys } = require('casper-js-sdk');
 
 // CONFIG (keep a single node here; script will try to use it)
-const NODE_URL = process.env.NODE_URL || "http://65.109.83.79:7777/rpc";
+const NODE_URL = process.env.NODE_URL || "https://node.testnet.casper.network/rpc";
 const NETWORK_NAME = process.env.NETWORK_NAME || "casper-test";
 const KEY_PATH = process.env.KEY_PATH || "C:/Users/HP/Desktop/casperkeys/secret_key.pem";
 
@@ -10,7 +10,7 @@ const KEY_PATH = process.env.KEY_PATH || "C:/Users/HP/Desktop/casperkeys/secret_
 // 1) CLI arg: `node init_v2.cjs <contract-hash>`
 // 2) env var: CONTRACT_HASH
 // 3) hard-coded below (fallback) -- leave as placeholder to trigger auto-detect
-let CONTRACT_HASH = process.argv[2] || process.env.CONTRACT_HASH || "hash-5d1ddfd92cf74a044b398305788fdcb913feee8f2be6fa845684fb34e9d02709";
+let CONTRACT_HASH = process.argv[2] || process.env.DAO_CONTRACT_HASH || "hash-e4effb82c8c163e74a00d1d090482403b3e673021efca8c7654367d8819929a8";
 
 async function loadKeys() {
   try {
@@ -47,7 +47,7 @@ const init = async () => {
 
   // If CONTRACT_HASH is placeholder, try to auto-detect from deployer account named keys
   const normalized = normalizeHashString(CONTRACT_HASH);
-  if (!normalized || normalized.includes('PASTE_YOUR_HASH_HERE')) {
+  if (!normalized || normalized.includes('hash-e4effb82c8c163e74a00d1d090482403b3e673021efca8c7654367d8819929a8')) {
     console.log('⚠️ CONTRACT_HASH not provided or placeholder — attempting to auto-detect from account named keys...');
     try {
       const accInfo = await client.getAccountInfo(keys.publicKey);
