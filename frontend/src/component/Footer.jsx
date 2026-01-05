@@ -4,8 +4,8 @@ const Footer = () => (
   <footer id="contact" className="py-5 foot-bg text-white text-center mt-5">
     <div className="container">
       <h2 className="mb-4">Get In Touch</h2>
-      <p className="lead mb-4">I'm currently looking for new opportunities in Frontend Web Development and Blockchain Development.</p>
-      <div className="d-flex justify-content-center gap-4 mb-4">
+      <p className="lead mb-4">CasperDAO is a complete Governance-as-a-Service (GaaS) platform. It serves as a DAO Factory, allowing anyone to deploy a fully functional, audit-ready governance contract in seconds, without writing a single line of code.</p>
+      <div className="d-flex justify-content-center gap-4 mb-4 foot-links">
         <a href="mailto:Telix05@gmail.com" className="text-white text-decoration-none">
           <strong>Contact</strong> 
         </a>
@@ -20,7 +20,7 @@ const Footer = () => (
         </a>
       </div>
       <hr className="bg-secondary" />
-      <p className="small text-secondary mb-0">© 2025 Casper Dao. Built with JavaScript & CasperSDK.</p>
+      <p className="small mb-0">© 2025 Casper Dao. Built with JavaScript & CasperSDK.</p>
     </div>
     
   </footer>

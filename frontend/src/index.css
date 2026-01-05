@@ -150,4 +150,11 @@ nav {
 }
 .foot-bg{
   background-color: rgba(85, 122, 201);
+
+}
+.foot-links strong{
+  color: rgba(7, 14, 50);
+}
+.foot-bg p, h2{
+  color: rgba(7, 14, 50);
 }

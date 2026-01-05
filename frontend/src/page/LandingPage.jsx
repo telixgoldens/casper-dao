@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { FaGhost } from "react-icons/fa";
 import Ghostimg from "../assets/ghostjpg.png";
 import Footer from "../component/Footer";
-
-// 👇 Import your pages
 import Products from "./Products";
 import Resources from "./Resources";
 import Contacts from "./Contacts";
@@ -11,7 +9,6 @@ import Contacts from "./Contacts";
 export default function LandingPage({ onConnect }) {
   const [currentView, setCurrentView] = useState("home");
 
-  // Logic to switch content
   const renderContent = () => {
     switch (currentView) {
       case "Products":
@@ -21,7 +18,6 @@ export default function LandingPage({ onConnect }) {
       case "Contacts":
         return <Contacts />;
       default:
-        // Your Original Hero Section
         return (
           <div className="hero-inner">
             <div className="hero-left ">
@@ -33,8 +29,8 @@ export default function LandingPage({ onConnect }) {
               </h1>
 
               <p className="">
-                Engineered for limitless scalability, uncompromised security, and
-                seamless upgradeability. The definitive enterprise-grade
+                Engineered for limitless scalability, uncompromised security,
+                and seamless upgradeability. The definitive enterprise-grade
                 foundation empowering the next generation of DAOs and dApps.
                 Future-proof your vision on a network built to evolve with the
                 speed of innovation.
@@ -67,26 +63,25 @@ export default function LandingPage({ onConnect }) {
   return (
     <div className="min-h-screen bg-nebula bg-grid-texture relative flex flex-col">
       <nav className="d-flex justify-content-between container">
-        {/* Added onClick to Logo to go Home, but kept your classes exact */}
-        <div 
-            onClick={() => setCurrentView("home")}
-            className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white ghost-name"
-            style={{ cursor: "pointer" }}
+        <div
+          onClick={() => setCurrentView("home")}
+          className="flex items-center gap-3 text-2xl font-bold tracking-tight text-white ghost-name"
+          style={{ cursor: "pointer" }}
         >
           <FaGhost className="text-cyan-400" />
           <span>Casper Dao</span>
         </div>
-        
+
         <div></div>
-        
+
         <div className=" d-flex gap-5 text-sm font-medium text-slate-300 ghost-map">
           {["Products", "Resources", "Contacts"].map((item) => (
             <a
               key={item}
               href="#"
               onClick={(e) => {
-                e.preventDefault(); 
-                setCurrentView(item); 
+                e.preventDefault();
+                setCurrentView(item);
               }}
               className={`hover:text-cyan-400 text-decoration-none ${
                 currentView === item ? "text-cyan-400" : "text-white"
@@ -106,12 +101,9 @@ export default function LandingPage({ onConnect }) {
           </button>
         </div>
       </nav>
-      
-      <main className="container ">
-        {/* This renders either your Hero OR the new pages */}
-        {renderContent()}
-      </main>
-      
+
+      <main className="container ">{renderContent()}</main>
+
       {currentView === "home" && <Footer />}
     </div>
   );
