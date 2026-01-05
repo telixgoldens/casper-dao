@@ -1,7 +1,6 @@
 const db = require('./db');
 require('dotenv').config();
 
-
 let EventSourceImpl = globalThis.EventSource || null;
 if (!EventSourceImpl) {
   try {
@@ -21,7 +20,6 @@ if (!EventSourceImpl) {
 const startWatcher = () => {
   console.log("👀 Indexer Watcher Started...");
 
-  
   const url = process.env.NODE_URL || "http://159.65.203.12:9999/events/main";
   
   function createEventSource(u) {
@@ -48,7 +46,7 @@ const startWatcher = () => {
 
   const es = createEventSource(url);
 
-  console.log(` Connecting to Event Stream at: ${url}`);
+  console.log(`Connecting to Event Stream at: ${url}`);
 
   es.onopen = () => {
     console.log("Connection to Blockchain Event Stream Open!");
@@ -60,54 +58,56 @@ const startWatcher = () => {
 
   es.addEventListener('DeployProcessed', async (event) => {
     try {
-        const body = JSON.parse(event.data);
-        const deploy = body.DeployProcessed;
+      const body = JSON.parse(event.data);
+      const deploy = body.DeployProcessed;
 
-        if (!deploy.execution_result.Success) return;
+      if (!deploy.execution_result.Success) return;
 
-        const session = deploy.deploy_session;
-        let args = null;
-        
-        
-        if (session.StoredContractByHash) {
-            args = session.StoredContractByHash.args;
-        } else if (session.ModuleBytes) {
-            args = session.ModuleBytes.args;
-        }
+      const session = deploy.deploy_session;
+      let args = null;
+      
+      if (session.StoredContractByHash) {
+        args = session.StoredContractByHash.args;
+      } else if (session.ModuleBytes) {
+        args = session.ModuleBytes.args;
+      }
 
-        if (args) {
-            const daoIdArg = args.find(a => a[0] === 'dao_id');
-            const choiceArg = args.find(a => a[0] === 'choice');
+      if (args) {
+        const daoIdArg = args.find(a => a[0] === 'dao_id');
+        const choiceArg = args.find(a => a[0] === 'choice');
+        const proposalIdArg = args.find(a => a[0] === 'proposal_id');
 
-            if (daoIdArg && choiceArg) {
-                console.log("REAL VOTE DETECTED ON CHAIN!");
-                
-                const daoId = daoIdArg[1].parsed;
-                const choice = choiceArg[1].parsed; 
-                const voter = deploy.account;
-                const hash = deploy.deploy_hash;
-                const stmt = db.prepare("INSERT OR IGNORE INTO votes (deploy_hash, dao_id, proposal_id, voter_address, choice) VALUES (?, ?, ?, ?, ?)");
-                stmt.run(hash, daoId, "1", voter, choice);
-                stmt.finalize();
+        if (daoIdArg && choiceArg) {
+          console.log("REAL VOTE DETECTED ON CHAIN!");
+          
+          const daoId = daoIdArg[1].parsed;
+          const choice = choiceArg[1].parsed === 'true' || choiceArg[1].parsed === true;
+          const proposalId = proposalIdArg ? proposalIdArg[1].parsed : "1";
+          const voter = deploy.account;
+          const hash = deploy.deploy_hash;
+          
+          console.log(`  DAO ID: ${daoId}, Proposal: ${proposalId}, Choice: ${choice ? 'YES' : 'NO'}, Voter: ${voter}`);
+          
+          db.run(
+            "INSERT OR IGNORE INTO votes (deploy_hash, dao_id, proposal_id, voter_address, choice) VALUES (?, ?, ?, ?, ?)",
+            [hash, daoId, proposalId, voter, choice ? 1 : 0],
+            (err) => {
+              if (err) {
+                console.error("Error inserting vote:", err);
+              } else {
+                console.log("Vote stored in database");
+              }
             }
+          );
         }
+      }
     } catch (err) {
-        console.error("Error parsing event:", err.message);
+      console.error(" Error parsing event:", err.message);
     }
   });
 
-  console.log("Simulator Active: Generating fake votes every 5s...");
-  setInterval(() => {
-    const fakeHash = "0x" + Math.random().toString(36).substring(7);
-    const fakeVoter = "01" + Math.random().toString(36).substring(7);
-    const fakeChoice = Math.random() > 0.4; 
-    
-    const stmt = db.prepare("INSERT INTO votes (deploy_hash, dao_id, proposal_id, voter_address, choice) VALUES (?, ?, ?, ?, ?)");
-    stmt.run(fakeHash, "123", "1", fakeVoter, fakeChoice, (err) => {
-       if (!err) console.log(`Simulating vote: ${fakeChoice ? "YES" : "NO"}`);
-    });
-    stmt.finalize();
-  }, 5000);
+  
+  console.log("Watcher ready - indexing real blockchain votes only");
 };
 
 module.exports = { startWatcher };

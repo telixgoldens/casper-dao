@@ -13,7 +13,8 @@ const {
   ContractCallBuilder,
   Args,
   CLValue,
-  serializeArgs,  
+  serializeArgs,
+  KeyValue,  
   deserializeArgs
 } = CasperSDK;
 
@@ -188,14 +189,26 @@ app.post("/deploy-create-dao", async (req, res) => {
     console.log('Creating DAO:', daoName);
     console.log('Requested by user:', userPublicKey);
 
-    const tokenHashHex = TOKEN_CONTRACT_HASH.slice(5);
-    const tokenBytes = Uint8Array.from(Buffer.from(tokenHashHex, "hex"));
+    // Alternative: Send token_address as ByteArray with Key type indicator
+const tokenHashHex = TOKEN_CONTRACT_HASH.slice(5);
 
-    const argsMap = {
-      name: CLValue.newCLString(daoName),
-      token_address: CLValue.newCLByteArray(tokenBytes),
-      token_type: CLValue.newCLString("u256_address")
-    };
+console.log('Sending token_address as ByteArray with type prefix');
+
+// Create bytes: [key_type_byte, ...hash_bytes]
+// Key type 1 = Hash
+const keyTypePrefix = new Uint8Array([1]); // 1 = Hash
+const hashBytes = Uint8Array.from(Buffer.from(tokenHashHex, 'hex'));
+const keyBytes = new Uint8Array(keyTypePrefix.length + hashBytes.length);
+keyBytes.set(keyTypePrefix, 0);
+keyBytes.set(hashBytes, keyTypePrefix.length);
+
+const argsMap = {
+  name: CLValue.newCLString(daoName),
+  token_address: CLValue.newCLByteArray(keyBytes), // 33 bytes: 1 byte type + 32 bytes hash
+  token_type: CLValue.newCLString("key") // Change type to "key" not "u256_address"
+};
+
+
 
     const args = Args.fromMap(argsMap);
 
@@ -206,7 +219,7 @@ app.post("/deploy-create-dao", async (req, res) => {
       .entryPoint("create_dao")
       .from(publicKey)
       .chainName(NETWORK_NAME)
-      .payment(300_000_000_000, 1)
+      .payment(300_000_000_000)
       .ttl(1800000)
       .runtimeArgs(args);
 
@@ -238,6 +251,69 @@ app.post("/deploy-create-dao", async (req, res) => {
   }
 });
 
+app.get('/extract-dao-id/:deployHash', async (req, res) => {
+  try {
+    const { deployHash } = req.params;
+    
+    console.log('Fetching deploy info for:', deployHash);
+    
+    const response = await fetch(RPC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'info_get_deploy',
+        params: [deployHash]
+      })
+    });
+
+    const result = await response.json();
+    
+    if (result.error) {
+      throw new Error(`RPC Error: ${result.error.message}`);
+    }
+
+    const executionResult = result.result?.execution_info?.execution_result?.Version2;
+    
+    if (!executionResult) {
+      return res.status(404).json({ error: 'Deploy not executed yet. Wait a minute and try again.' });
+    }
+
+    let daoId = null;
+    
+    // Search through effects for event_dao_created_*
+    if (executionResult.effects) {
+      for (const effect of executionResult.effects) {
+        if (effect.kind?.AddKeys) {
+          for (const addedKey of effect.kind.AddKeys) {
+            if (addedKey.name && addedKey.name.startsWith('event_dao_created_')) {
+              daoId = addedKey.name.replace('event_dao_created_', '');
+              console.log('✅ Found DAO ID:', daoId);
+              break;
+            }
+          }
+        }
+        if (daoId) break;
+      }
+    }
+
+    if (!daoId) {
+      return res.status(404).json({ error: 'DAO ID not found in execution effects' });
+    }
+
+    res.json({ 
+      daoId,
+      deployHash,
+      message: `Use this dao_id when voting: ${daoId}`
+    });
+    
+  } catch (err) {
+    console.error('Error extracting dao_id:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- 4. Deploy: Vote ---
 app.post("/deploy-vote", async (req, res) => {
   try {
@@ -265,7 +341,7 @@ app.post("/deploy-vote", async (req, res) => {
       .entryPoint("vote")
       .from(publicKey)
       .chainName(NETWORK_NAME)
-      .payment(150_000_000_000, 1)
+      .payment(150_000_000_000)
       .ttl(1800000)
       .runtimeArgs(args);
 
@@ -274,7 +350,7 @@ app.post("/deploy-vote", async (req, res) => {
 
     const deployHash = await putDeployViaRPC(transaction);
 
-    console.log('✅ Vote submitted successfully. Deploy hash:', deployHash);
+    console.log('Vote submitted successfully. Deploy hash:', deployHash);
     console.log('Voter:', userPublicKey);
 
     res.json({ 
@@ -286,8 +362,34 @@ app.post("/deploy-vote", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+ 
+// Add this route to clear simulated votes
+app.delete('/clear-simulated-votes', (req, res) => {
+  console.log('Clearing simulated votes...');
+  
+  // Delete votes that look like simulated ones (0x followed by short random string)
+  db.run("DELETE FROM votes WHERE deploy_hash LIKE '0x%' AND length(deploy_hash) < 20", (err) => {
+    if (err) {
+      console.error('Error clearing votes:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    
+    db.get("SELECT COUNT(*) as count FROM votes", (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+      console.log(`✅ Simulated votes cleared. Remaining votes: ${row.count}`);
+      res.json({ message: 'Simulated votes cleared', remainingVotes: row.count });
+    });
+  });
+});
 
-// --- Start server + watcher ---
+// Also add a route to get all votes for debugging
+app.get('/all-votes', (req, res) => {
+  db.all("SELECT * FROM votes ORDER BY timestamp DESC", (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ votes: rows });
+  });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log('🚀 API running on port', PORT);

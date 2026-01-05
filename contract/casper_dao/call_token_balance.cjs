@@ -25,9 +25,6 @@ async function main(){
   console.log('Key loaded');
 
   const params = new DeployUtil.DeployParams(keys.publicKey, NETWORK_NAME);
-
-  // Build args: address = Key::Account(account_hash)
-  // Use KeyValue.fromAccount with publicKey (casper-js-sdk supports this)
   const addrKey = KeyValue.fromAccount(keys.publicKey);
   const args = RuntimeArgs.fromMap({ address: CLValue.key(addrKey) });
 
@@ -39,7 +36,6 @@ async function main(){
   try {
     const deployHash = await client.putDeploy(deploy);
     console.log('balance_of deploy hash:', deployHash);
-    // use check_deploy to fetch results
     const { execSync } = require('child_process');
     try {
       execSync(`node check_deploy.js ${deployHash}`, { stdio: 'inherit', cwd: __dirname });
