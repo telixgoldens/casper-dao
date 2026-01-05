@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { deployCreateDao } from '../utils/casperService';
 
 export default function CreateDAO({ onDeploy }) {
-    const { activeKey } = useCasper(); // Only get activeKey, don't try to set it
+    const { activeKey } = useCasper(); 
     const [isDeploying, setIsDeploying] = useState(false);
 
     const {
@@ -35,18 +35,17 @@ export default function CreateDAO({ onDeploy }) {
 
         setIsDeploying(true);
         try {
-            // Call the backend via casperService
             const deployHash = await deployCreateDao(activeKey, data.name);
 
             alert(
-                `🚀 Deploy Sent!\nDAO Name: ${data.name}\nSymbol: ${data.symbol}\nHash: ${deployHash}\n\nCheck Casper Live in 1–2 mins.`
+                `Deploy Sent!\nDAO Name: ${data.name}\nSymbol: ${data.symbol}\nHash: ${deployHash}\n\nCheck Casper Live in 1–2 mins.`
             );
 
             reset();
             if (onDeploy) onDeploy({ ...data, deployHash });
         } catch (err) {
             console.error(err);
-            alert("❌ Deploy Failed: " + err.message);
+            alert("Deploy Failed: " + err.message);
         } finally {
             setIsDeploying(false);
         }
@@ -60,7 +59,6 @@ export default function CreateDAO({ onDeploy }) {
 
                         <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
 
-                        {/* Wallet Status Banner */}
                         {activeKey && (
                             <div className="mb-6 pt-3 bg-green-500/10 border border-green-500/30 rounded-xl p-4">
                                 <div className="flex items-center gap-3">
@@ -84,8 +82,6 @@ export default function CreateDAO({ onDeploy }) {
                         </div>
 
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
-                            {/* Name + Symbol */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">DAO Name</label>
@@ -96,7 +92,6 @@ export default function CreateDAO({ onDeploy }) {
                                     />
                                     {errors.name && <p className="text-xs text-rose-400 mt-1">{errors.name.message}</p>}
                                 </div>
-
                                 <div className="space-y-2 pt-3">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Token Symbol</label>
                                     <input
@@ -107,8 +102,6 @@ export default function CreateDAO({ onDeploy }) {
                                     {errors.symbol && <p className="text-xs text-rose-400 mt-1">{errors.symbol.message}</p>}
                                 </div>
                             </div>
-
-                            {/* Sliders */}
                             <div className="space-y-6 pt-4">
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-sm">
@@ -129,7 +122,6 @@ export default function CreateDAO({ onDeploy }) {
                                     />
                                     <p className="text-[10px] text-slate-500">Percentage of total supply needed to validate a vote.</p>
                                 </div>
-
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-300 flex items-center gap-2"><FaCheckCircle className="text-green-400"/> Min Approval</span>
@@ -150,8 +142,6 @@ export default function CreateDAO({ onDeploy }) {
                                     <p className="text-[10px] text-slate-500">Minimum "Yes" votes required to pass a proposal.</p>
                                 </div>
                             </div>
-
-                            {/* Submit */}
                             <div className="pt-2">
                                 <button
                                     type="submit"

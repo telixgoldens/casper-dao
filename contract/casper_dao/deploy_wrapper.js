@@ -41,11 +41,9 @@ async function waitForExecution(client, deployHash, timeoutMs=120000){
   const exec = await waitForExecution(client, dh);
   console.log('execution_info:', JSON.stringify(exec, null, 2));
 
-  // parse effects to find contract write or AddKeys
   const effects = exec.execution_result?.Version2?.effects || exec.effects || [];
   let contractHash = null;
   for(const eff of effects){
-    // Write contract / contract package
     if(eff.kind && eff.kind.Write && eff.kind.Write.Contract){
       const c = eff.kind.Write.Contract;
       contractHash = c.contract_wasm_hash || c.contract_package_hash || null;

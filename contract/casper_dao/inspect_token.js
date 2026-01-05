@@ -17,7 +17,6 @@ function normalizeHash(h) {
   const token = normalizeHash(tokenArg);
   console.log('Inspecting token:', token);
 
-  // Try high-level SDK methods first
   try {
     if (client.nodeClient && client.nodeClient.getContract) {
       console.log('Trying client.nodeClient.getContract(...)');
@@ -40,7 +39,6 @@ function normalizeHash(h) {
     console.warn('client.getContract failed:', e.message || e);
   }
 
-  // Fallback: use JSON-RPC state_get_item using current state root
   try {
     console.log('Falling back to JSON-RPC state_get_item via state_root_hash');
     const root = await client.nodeClient.getStateRootHash();
@@ -65,7 +63,6 @@ function normalizeHash(h) {
     }
     console.log('state_get_item result:', JSON.stringify(j.result, null, 2));
 
-    // Try to parse contract info inside result
     const stored_value = j.result.stored_value || j.result.value || null;
     if (!stored_value) return;
     console.log('\nStored value kind:', Object.keys(stored_value)[0]);

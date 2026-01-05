@@ -148,3 +148,6 @@ nav {
   box-shadow: none !important;
   -webkit-filter: none !important;
 }
+.foot-bg{
+  background-color: rgba(85, 122, 201);
+}

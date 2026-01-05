@@ -1,6 +1,5 @@
 const BACKEND_URL = "http://localhost:3001";
 
-// Connect wallet and get user's public key
 export const connectWallet = async () => {
   try {
     if (!window.CasperWalletProvider) {
@@ -15,7 +14,7 @@ export const connectWallet = async () => {
     }
 
     const activePublicKey = await provider.getActivePublicKey();
-    console.log('✅ Wallet connected. Public key:', activePublicKey);
+    console.log('Wallet connected. Public key:', activePublicKey);
     
     return activePublicKey;
   } catch (err) {
@@ -24,7 +23,6 @@ export const connectWallet = async () => {
   }
 };
 
-// Check if wallet is already connected
 export const checkWalletConnection = async () => {
   try {
     if (!window.CasperWalletProvider) {
@@ -46,7 +44,6 @@ export const checkWalletConnection = async () => {
   }
 };
 
-// Disconnect wallet
 export const disconnectWallet = async () => {
   try {
     if (!window.CasperWalletProvider) {
@@ -55,7 +52,7 @@ export const disconnectWallet = async () => {
     
     const provider = window.CasperWalletProvider();
     await provider.disconnectFromSite();
-    console.log('✅ Wallet disconnected');
+    console.log('Wallet disconnected');
   } catch (err) {
     console.error('Disconnect wallet error:', err);
   }
@@ -76,7 +73,7 @@ export const deployCreateDao = async (userPublicKey, daoName) => {
       },
       body: JSON.stringify({
         daoName: daoName,
-        userPublicKey: userPublicKey // Send user's public key for identification
+        userPublicKey: userPublicKey 
       })
     });
 
@@ -86,7 +83,7 @@ export const deployCreateDao = async (userPublicKey, daoName) => {
       throw new Error(data.error || 'Failed to create DAO');
     }
 
-    console.log('✅ DAO creation successful. Deploy hash:', data.deployHash);
+    console.log('DAO creation successful. Deploy hash:', data.deployHash);
     return data.deployHash;
 
   } catch (err) {
@@ -111,7 +108,7 @@ export const deployVote = async (userPublicKey, daoId, choice) => {
       body: JSON.stringify({
         daoId: daoId,
         choice: choice,
-        userPublicKey: userPublicKey // Send user's public key for identification
+        userPublicKey: userPublicKey 
       })
     });
 
@@ -121,7 +118,7 @@ export const deployVote = async (userPublicKey, daoId, choice) => {
       throw new Error(data.error || 'Failed to vote');
     }
 
-    console.log('✅ Vote successful. Deploy hash:', data.deployHash);
+    console.log('Vote successful. Deploy hash:', data.deployHash);
     return data.deployHash;
 
   } catch (err) {
@@ -130,7 +127,6 @@ export const deployVote = async (userPublicKey, daoId, choice) => {
   }
 };
 
-// Fetch votes for a proposal
 export const getVotes = async (proposalId) => {
   try {
     const response = await fetch(`${BACKEND_URL}/votes/${proposalId}`);
@@ -147,7 +143,6 @@ export const getVotes = async (proposalId) => {
   }
 };
 
-// Fetch voting stats
 export const getStats = async (daoId, proposalId) => {
   try {
     const response = await fetch(`${BACKEND_URL}/stats/${daoId}/${proposalId}`);

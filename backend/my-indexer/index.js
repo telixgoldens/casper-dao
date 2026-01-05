@@ -6,31 +6,23 @@ require('dotenv').config();
 
 const CasperSDK = require('casper-js-sdk');
 
+
 const {
   PrivateKey,
   KeyAlgorithm,
+  ContractCallBuilder,
   Args,
-  CLValueString,
-  CLValueByteArray,
-  CLValueUInt64,
-  CLValueBool,
-  CLValueUInt512,
-  Deploy,
-  DeployHeader,
-  StoredContractByHash,
-  ModuleBytes,
-  Hash,
-  Approval,
-  Timestamp,
-  Duration
+  CLValue,
+  serializeArgs,  
+  deserializeArgs
 } = CasperSDK;
 
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
-const crypto = require('crypto');
 
-const NODE_URL = process.env.NODE_URL || "http://65.109.83.79:7777/rpc";
+const RPC_URL = process.env.RPC_URL || "http://65.109.83.79:7777/rpc";
+const EVENT_STREAM_URL = process.env.NODE_URL || "http://159.65.203.12:9999/events/main";
 const NETWORK_NAME = "casper-test";
 const DAO_CONTRACT_HASH = "hash-5602ff70a5643b82d87302db480387a62d5993a5d2c267e8e88fd93a14e5c368";
 const TOKEN_CONTRACT_HASH = "hash-c27539ac84749caebee898677d44fd3344b1772cbaf99f72897f47aad40cfea1";
@@ -42,13 +34,80 @@ const privateKeyPem = fs.readFileSync(KEYS_PATH, 'utf-8');
 const privateKey = PrivateKey.fromPem(privateKeyPem, KeyAlgorithm.ED25519);
 const publicKey = privateKey.publicKey;
 
-console.log('✅ Loaded public key:', publicKey.toHex());
+console.log('Loaded public key:', publicKey.toHex());
 
-// Helper function to send deploy via RPC
-async function putDeployViaRPC(deploy) {
-  const deployJson = deploy.toJson ? deploy.toJson() : JSON.parse(JSON.stringify(deploy));
+
+async function putDeployViaRPC(transaction) {
+  let deploy;
   
-  const response = await fetch(NODE_URL, {
+  if (transaction.getDeploy && typeof transaction.getDeploy === 'function') {
+    deploy = transaction.getDeploy();
+  } else {
+    deploy = transaction;
+  }
+  
+  console.log('Using serializeArgs from SDK...');
+  
+  // Extract the Args objects before they get stringified
+  let sessionArgsJson = [];
+  let paymentArgsJson = [];
+  
+  try {
+    if (deploy.session?.storedContractByHash?.args) {
+      const argsObj = deploy.session.storedContractByHash.args;
+      sessionArgsJson = serializeArgs(argsObj);
+      console.log('✅ Serialized session args');
+    }
+  } catch (e) {
+    console.error('Error serializing session args:', e.message);
+  }
+  
+  try {
+    if (deploy.payment?.moduleBytes?.args) {
+      const argsObj = deploy.payment.moduleBytes.args;
+      paymentArgsJson = serializeArgs(argsObj);
+      console.log('✅ Serialized payment args');
+    }
+  } catch (e) {
+    console.error('Error serializing payment args:', e.message);
+  }
+  
+  // Build the deploy JSON manually
+  const deployJson = {
+    hash: deploy.hash?.value || deploy.hash,
+    header: {
+      account: deploy.header.account.value || deploy.header.account,
+      timestamp: deploy.header.timestamp.toJSON ? deploy.header.timestamp.toJSON() : deploy.header.timestamp,
+      ttl: deploy.header.ttl.toJSON ? deploy.header.ttl.toJSON() : deploy.header.ttl,
+      gas_price: deploy.header.gasPrice,
+      body_hash: deploy.header.bodyHash?.value || deploy.header.bodyHash,
+      dependencies: [],
+      chain_name: deploy.header.chainName
+    },
+    payment: {
+      ModuleBytes: {
+        module_bytes: "",
+        args: paymentArgsJson  // Use serialized args
+      }
+    },
+    session: {
+      StoredContractByHash: {
+        hash: deploy.session.storedContractByHash.hash?.value || deploy.session.storedContractByHash.hash,
+        entry_point: deploy.session.storedContractByHash.entryPoint,
+        args: sessionArgsJson  // Use serialized args
+      }
+    },
+    approvals: deploy.approvals.map(a => ({
+      signer: a.signer.value || a.signer,
+      signature: a.signature.value || a.signature
+    }))
+  };
+  
+  console.log('Deploy JSON with serialized args:');
+  console.log('Session args type:', typeof sessionArgsJson, 'length:', Array.isArray(sessionArgsJson) ? sessionArgsJson.length : 'N/A');
+  console.log('Payment args type:', typeof paymentArgsJson, 'length:', Array.isArray(paymentArgsJson) ? paymentArgsJson.length : 'N/A');
+  
+  const response = await fetch(RPC_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -62,8 +121,13 @@ async function putDeployViaRPC(deploy) {
   const result = await response.json();
   
   if (result.error) {
+    console.error('RPC Error:', result.error);
+    console.error('Deploy sample:', JSON.stringify(deployJson, null, 2).substring(0, 1500));
     throw new Error(`RPC Error: ${result.error.message}`);
   }
+  
+  console.log('🎉🎉🎉 DEPLOY SUCCESSFUL! 🎉🎉🎉');
+  console.log('Deploy hash:', result.result.deploy_hash);
   
   return result.result.deploy_hash;
 }
@@ -124,75 +188,41 @@ app.post("/deploy-create-dao", async (req, res) => {
     console.log('Creating DAO:', daoName);
     console.log('Requested by user:', userPublicKey);
 
-    const tokenBytes = Uint8Array.from(Buffer.from(TOKEN_CONTRACT_HASH.slice(5), "hex"));
+    const tokenHashHex = TOKEN_CONTRACT_HASH.slice(5);
+    const tokenBytes = Uint8Array.from(Buffer.from(tokenHashHex, "hex"));
 
-    // Create CLValues
-    const nameArg = new CLValueString(daoName);
-    const tokenAddressArg = new CLValueByteArray(tokenBytes);
-    const tokenTypeArg = new CLValueString("u256_address");
+    const argsMap = {
+      name: CLValue.newCLString(daoName),
+      token_address: CLValue.newCLByteArray(tokenBytes),
+      token_type: CLValue.newCLString("u256_address")
+    };
 
-    // Create Args
-    const args = Args.fromMap({
-      name: nameArg,
-      token_address: tokenAddressArg,
-      token_type: tokenTypeArg,
-    });
+    const args = Args.fromMap(argsMap);
 
-    // Create session
-    const contractHashBytes = Uint8Array.from(Buffer.from(DAO_CONTRACT_HASH.slice(5), "hex"));
-    const session = new StoredContractByHash(contractHashBytes, "create_dao", args);
-
-    // Create payment
-    const paymentAmount = new CLValueUInt512(BigInt("300000000000"));
-    const paymentArgs = Args.fromMap({
-      amount: paymentAmount
-    });
-    const payment = new ModuleBytes(new Uint8Array(0), paymentArgs);
-
-    // Create deploy with proper initialization
-    const deploy = new Deploy();
-    deploy.header = new DeployHeader();
-    deploy.header.account = publicKey;
-    deploy.header.timestamp = new Timestamp(new Date()); // Pass Date object
-    deploy.header.ttl = new Duration(1800000); // milliseconds
-    deploy.header.gasPrice = 1;
-    deploy.header.chainName = NETWORK_NAME;
-    deploy.header.dependencies = [];
+    const builder = new ContractCallBuilder();
     
-    // Initialize bodyHash and hash with empty Hash objects
-    const emptyHashBytes = new Uint8Array(32).fill(0);
-    deploy.header.bodyHash = new Hash(emptyHashBytes);
-    deploy.hash = new Hash(emptyHashBytes);
-    
-    deploy.payment = payment;
-    deploy.session = session;
-    deploy.approvals = [];
+    builder
+      .byHash(DAO_CONTRACT_HASH.slice(5))
+      .entryPoint("create_dao")
+      .from(publicKey)
+      .chainName(NETWORK_NAME)
+      .payment(300_000_000_000, 1)
+      .ttl(1800000)
+      .runtimeArgs(args);
 
-    console.log('Deploy structure created, attempting to sign...');
+    console.log('Building transaction...');
+    const transaction = builder.buildFor1_5();
+    
+    console.log('Transaction built:', !!transaction);
+    console.log('Signing transaction...');
+    
+    // sign() modifies in place, doesn't return
+    transaction.sign(privateKey);
 
-    // Get deploy bytes for signing
-    const deployBytes = deploy.toBytes();
-    console.log('✅ Deploy serialized to bytes, length:', deployBytes.length);
-    
-    // Sign with private key
-    const signature = privateKey.sign(deployBytes);
-    console.log('✅ Signature created');
-    
-    // Create approval
-    const approval = new Approval();
-    approval.signer = publicKey;
-    approval.signature = signature;
-    
-    deploy.approvals = [approval];
-    
-    // Compute deploy hash from the bytes
-    const hashBytes = crypto.createHash('blake2b256').update(deployBytes).digest();
-    deploy.hash = new Hash(hashBytes);
-    
-    console.log('✅ Deploy signed and hashed');
+    console.log('✅ Transaction signed');
+    console.log('Sending to network...');
 
-    // Send deploy via RPC
-    const deployHash = await putDeployViaRPC(deploy);
+    const deployHash = await putDeployViaRPC(transaction);
 
     console.log('✅ DAO created successfully. Deploy hash:', deployHash);
     console.log('Creator:', userPublicKey);
@@ -219,51 +249,30 @@ app.post("/deploy-vote", async (req, res) => {
     console.log('Voting:', { daoId, choice });
     console.log('Voter:', userPublicKey);
 
-    const args = Args.fromMap({
-      dao_id: new CLValueUInt64(BigInt(daoId)),
-      proposal_id: new CLValueUInt64(BigInt(1)),
-      choice: new CLValueBool(choice),
-    });
+    const argsMap = {
+      dao_id: CLValue.newCLUint64(BigInt(daoId)),
+      proposal_id: CLValue.newCLUint64(BigInt(1)),
+      choice: CLValue.newCLValueBool(choice)
+    };
 
-    const contractHashBytes = Uint8Array.from(Buffer.from(DAO_CONTRACT_HASH.slice(5), "hex"));
-    const session = new StoredContractByHash(contractHashBytes, "vote", args);
+    const args = Args.fromMap(argsMap);
+    console.log('Vote args toBytes() length:', args.toBytes().length);
 
-    const paymentAmount = new CLValueUInt512(BigInt("150000000000"));
-    const paymentArgs = Args.fromMap({
-      amount: paymentAmount
-    });
-    const payment = new ModuleBytes(new Uint8Array(0), paymentArgs);
+    const builder = new ContractCallBuilder();
+    
+    builder
+      .byHash(DAO_CONTRACT_HASH.slice(5))
+      .entryPoint("vote")
+      .from(publicKey)
+      .chainName(NETWORK_NAME)
+      .payment(150_000_000_000, 1)
+      .ttl(1800000)
+      .runtimeArgs(args);
 
-    const deploy = new Deploy();
-    deploy.header = new DeployHeader();
-    deploy.header.account = publicKey;
-    deploy.header.timestamp = new Timestamp(new Date()); // Pass Date object
-    deploy.header.ttl = new Duration(1800000);
-    deploy.header.gasPrice = 1;
-    deploy.header.chainName = NETWORK_NAME;
-    deploy.header.dependencies = [];
-    
-    const emptyHashBytes = new Uint8Array(32).fill(0);
-    deploy.header.bodyHash = new Hash(emptyHashBytes);
-    deploy.hash = new Hash(emptyHashBytes);
-    
-    deploy.payment = payment;
-    deploy.session = session;
-    deploy.approvals = [];
+    const transaction = builder.buildFor1_5();
+    transaction.sign(privateKey);
 
-    const deployBytes = deploy.toBytes();
-    const signature = privateKey.sign(deployBytes);
-    
-    const approval = new Approval();
-    approval.signer = publicKey;
-    approval.signature = signature;
-    
-    deploy.approvals = [approval];
-    
-    const hashBytes = crypto.createHash('blake2b256').update(deployBytes).digest();
-    deploy.hash = new Hash(hashBytes);
-
-    const deployHash = await putDeployViaRPC(deploy);
+    const deployHash = await putDeployViaRPC(transaction);
 
     console.log('✅ Vote submitted successfully. Deploy hash:', deployHash);
     console.log('Voter:', userPublicKey);
@@ -282,7 +291,8 @@ app.post("/deploy-vote", async (req, res) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log('🚀 API running on port', PORT);
-  console.log('📡 Node URL:', NODE_URL);
+  console.log('📡 RPC URL:', RPC_URL);
+  console.log('📡 Event Stream URL:', EVENT_STREAM_URL);
   console.log('🔑 Public Key:', publicKey.toHex());
   startWatcher();
 });
