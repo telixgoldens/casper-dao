@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import LandingPage from "./page/LandingPage";
-import ProposalResults from "./component/ProposalResults";
 import { useCasper } from "./context/CasperContext";
 import { FaSignOutAlt, FaGhost } from "react-icons/fa";
 import CreateDAO from "./page/CreateDAO";
 import { deployVote } from "./utils/casperService";
 import Footer from "./component/Footer";
+import ActiveDAOs from "./component/ActiveDaos";
 
 const DAO_ID = "123";
 const PROPOSAL_ID = "1";
@@ -67,7 +67,7 @@ function App() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto p-8  pt-3 container">
+      <main className="max-w-6xl mx-auto p-8  pt-3 container ">
         <div className="mb-10 ">
           <h1 className="text-3xl font-bold mb-2">Governance Dashboard</h1>
           <p className="text-gray-400">
@@ -101,50 +101,8 @@ function App() {
             {activeTab === "create" ? (
               <CreateDAO />
             ) : (
-              <div className="bg-slate-800 p-8 rounded-xl border border-gray-700 relative">
-                {isVoting && (
-                  <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
-                    <div className="text-teal-400 font-bold animate-pulse">
-                      Processing Vote...
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-xl font-bold">
-                    Proposal #{PROPOSAL_ID}: Enable Liquid Staking?
-                  </h2>
-                  <span className="bg-green-500/10 text-green-400 text-xs px-2 py-1 rounded border border-green-500/20">
-                    Active
-                  </span>
-                </div>
-                <p className="text-gray-400 mb-8 leading-relaxed">
-                  Should we enable liquid staking for the treasury assets? This
-                  would allow the DAO to earn yield on idle CSPR.
-                </p>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={() => handleVote(true)} 
-                    disabled={isVoting}
-                    className="py-4 bg-green-500/10 border border-green-500/50 text-green-400 rounded-lg hover:bg-green-500/20 transition-all font-bold"
-                  >
-                    Vote YES
-                  </button>
-                  <button
-                    onClick={() => handleVote(false)} 
-                    disabled={isVoting}
-                    className="py-4 bg-red-500/10 border border-red-500/50 text-red-400 rounded-lg hover:bg-red-500/20 transition-all font-bold"
-                  >
-                    Vote NO
-                  </button>
-                </div>
-              </div>
+            <ActiveDAOs />
             )}
-          </div>
-
-          <div className="lg:col-span-1">
-            <ProposalResults daoId={DAO_ID} proposalId={PROPOSAL_ID} />
           </div>
         </div>
       </main>

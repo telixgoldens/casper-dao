@@ -4,7 +4,7 @@ const fs = require('fs');
 const NODE_URL = process.env.NODE_URL || "http://65.109.83.79:7777/rpc";
 const NETWORK_NAME = process.env.NETWORK_NAME || "casper-test";
 const KEY_PATH = process.env.KEY_PATH || "C:/Users/HP/Desktop/casperkeys/secret_key.pem";
-const TOKEN_HASH = process.argv[2] || process.env.TOKEN_HASH || 'hash-3af231b810cdff2158f181d85bf78cf16df93a28ba2d4056c3a6f67e9a0386ae';
+const TOKEN_HASH = process.argv[2] || process.env.TOKEN_HASH || 'hash-c27539ac84749caebee898677d44fd3344b1772cbaf99f72897f47aad40cfea1';
 
 async function loadKeys() {
   try { return Keys.Ed25519.loadKeyPairFromPrivateFile(KEY_PATH); }

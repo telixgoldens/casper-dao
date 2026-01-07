@@ -92,40 +92,75 @@ export const deployCreateDao = async (userPublicKey, daoName) => {
   }
 };
 
-export const deployVote = async (userPublicKey, daoId, choice) => {
+
+
+
+// Update the deployVote function in frontend/src/utils/casperService.js
+
+export async function deployVote(userPublicKey, daoId, choice) {
   try {
-    if (!userPublicKey) {
-      throw new Error('Please connect your wallet first');
+    if (!window.CasperWalletProvider) {
+      throw new Error('Casper Wallet not found. Please install the Casper Wallet extension.');
     }
 
-    console.log('Sending vote request to backend...');
-
-    const response = await fetch(`${BACKEND_URL}/deploy-vote`, {
+    console.log('Preparing vote deploy...');
+    
+    // Step 1: Get unsigned deploy from backend
+    const prepareResponse = await fetch(`${BACKEND_URL}/prepare-vote`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        daoId: daoId,
-        choice: choice,
-        userPublicKey: userPublicKey 
+        daoId,
+        choice,
+        userPublicKey
       })
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to vote');
+    if (!prepareResponse.ok) {
+      const error = await prepareResponse.json();
+      throw new Error(error.error || 'Failed to prepare vote');
     }
 
-    console.log('Vote successful. Deploy hash:', data.deployHash);
-    return data.deployHash;
+    const { deployJson } = await prepareResponse.json();
+    
+    console.log('Deploy prepared, requesting user signature...');
+    
+    // Step 2: Have user sign with Casper Wallet
+    const provider = window.CasperWalletProvider();
+    
+    const signedDeployJson = await provider.sign(
+      JSON.stringify(deployJson),
+      userPublicKey
+    );
 
-  } catch (err) {
-    console.error('Vote error:', err);
-    throw new Error('Failed to vote: ' + err.message);
+    console.log('Deploy signed by user, submitting to network...');
+    
+    // Step 3: Submit BOTH the signature AND original deploy
+    const submitResponse = await fetch(`${BACKEND_URL}/submit-signed-deploy`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        signedDeploy: signedDeployJson,
+        deployJson: deployJson  // ← Send original deploy too!
+      })
+    });
+
+    if (!submitResponse.ok) {
+      const error = await submitResponse.json();
+      throw new Error(error.error || 'Failed to submit vote');
+    }
+
+    const result = await submitResponse.json();
+    
+    console.log('✅ Vote submitted!', result.deployHash);
+    
+    return result.deployHash;
+    
+  } catch (error) {
+    console.error('Vote error:', error);
+    throw error;
   }
-};
+}
 
 export const getVotes = async (proposalId) => {
   try {

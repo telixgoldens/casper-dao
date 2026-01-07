@@ -1,51 +1,186 @@
 import { useEffect, useState } from 'react';
+import { useCasper } from '../context/CasperContext';
+import { deployVote } from '../utils/casperService';
 
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:3001";
 
 export default function ProposalResults({ daoId, proposalId }) {
+  const { activeKey } = useCasper();
   const [votes, setVotes] = useState([]);
   const [stats, setStats] = useState(null);
+  const [isVoting, setIsVoting] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const voteRes = await fetch(`${API_URL}/votes/${proposalId}`);
-      const voteData = await voteRes.json();
-      setVotes(voteData.votes);
+      try {
+        const voteRes = await fetch(`${API_URL}/votes/${proposalId}`);
+        const voteData = await voteRes.json();
+        setVotes(voteData.votes || []);
 
-      const statRes = await fetch(`${API_URL}/stats/${daoId}/${proposalId}`);
-      const statData = await statRes.json();
-      setStats(statData);
+        // Check if current user has voted
+        if (activeKey) {
+          const userVoted = voteData.votes?.some(v => v.voter_address === activeKey);
+          setHasVoted(userVoted);
+        }
+
+        const statRes = await fetch(`${API_URL}/stats/${daoId}/${proposalId}`);
+        const statData = await statRes.json();
+        setStats(statData);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
     };
 
     fetchData(); 
     const interval = setInterval(fetchData, 3000); 
 
     return () => clearInterval(interval);
-  }, [daoId, proposalId]);
+  }, [daoId, proposalId, activeKey]);
+
+  const handleVote = async (choice) => {
+    if (!activeKey) {
+      alert('Please connect your wallet first!');
+      return;
+    }
+
+    if (hasVoted) {
+      alert('You have already voted on this proposal!');
+      return;
+    }
+
+    setIsVoting(true);
+    try {
+      const deployHash = await deployVote(activeKey, daoId, choice);
+      
+      alert(
+        `Vote Submitted!\n\nChoice: ${choice ? 'YES ✅' : 'NO ❌'}\nDeploy Hash: ${deployHash}\n\nYour vote will appear in ~1 minute.`
+      );
+
+      setHasVoted(true);
+    } catch (err) {
+      console.error('Vote error:', err);
+      alert('Vote failed: ' + err.message);
+    } finally {
+      setIsVoting(false);
+    }
+  };
+
+  const yesPercentage = stats ? Math.round((stats.yes / (stats.total || 1)) * 100) : 0;
+  const noPercentage = stats ? Math.round((stats.no / (stats.total || 1)) * 100) : 0;
 
   return (
     <div className="p-4 border rounded shadow">
-      <h3>Live Results </h3>
-      <div className="mt-4">
-        <h4>Recent Votes (Blockchain Explorer)</h4>
-        <ul>
-          {votes.map((v) => (
-            <li key={v.deploy_hash} className="text-sm border-b py-2">
-              <span className={v.choice ? "text-green-500" : "text-red-500"}>
-                {v.choice ? "YES" : "NO"}
-              </span>
-              {" "} by {v.voter_address.substring(0, 10)}... 
-              <a 
-                href={`https://testnet.cspr.live/deploy/${v.deploy_hash}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-500 ml-2"
-              >
-                (View on CSPR.live)
-              </a>
-            </li>
-          ))}
-        </ul>
+      <h3 className="text-lg font-bold mb-4">Live Results</h3>
+      
+      {/* Vote Stats with Progress Bars */}
+      {stats && (
+        <div className="mb-6 space-y-3">
+          <div className="flex justify-between text-sm">
+            <span>Total Votes:</span>
+            <span className="font-bold">{stats.total}</span>
+          </div>
+
+          {/* YES Progress */}
+          <div>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-green-600 font-semibold">YES</span>
+              <span className="text-green-600 font-bold">{stats.yes} ({yesPercentage}%)</span>
+            </div>
+            <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-green-500 transition-all duration-500"
+                style={{ width: `${yesPercentage}%` }}
+              />
+            </div>
+          </div>
+
+          {/* NO Progress */}
+          <div>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-red-600 font-semibold">NO</span>
+              <span className="text-red-600 font-bold">{stats.no} ({noPercentage}%)</span>
+            </div>
+            <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-red-500 transition-all duration-500"
+                style={{ width: `${noPercentage}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Voting Buttons */}
+      <div className="mb-6">
+        {!activeKey ? (
+          <div className="bg-yellow-100 border border-yellow-400 rounded p-3 text-center text-sm text-yellow-700">
+            Connect your wallet to vote
+          </div>
+        ) : hasVoted ? (
+          <div className="bg-green-100 border border-green-400 rounded p-3 text-center text-sm text-green-700">
+            ✅ You have voted on this proposal
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => handleVote(true)}
+              disabled={isVoting}
+              className={`py-3 px-4 rounded-lg font-bold text-white transition-all ${
+                isVoting
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
+              }`}
+            >
+              {isVoting ? '⏳ Voting...' : '✅ Vote YES'}
+            </button>
+            <button
+              onClick={() => handleVote(false)}
+              disabled={isVoting}
+              className={`py-3 px-4 rounded-lg font-bold text-white transition-all ${
+                isVoting
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-red-600 hover:bg-red-700 hover:shadow-lg'
+              }`}
+            >
+              {isVoting ? '⏳ Voting...' : '❌ Vote NO'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Recent Votes List */}
+      <div className="mt-6">
+        <h4 className="font-semibold mb-3">Recent Votes (Blockchain Explorer)</h4>
+        {votes.length === 0 ? (
+          <p className="text-gray-500 text-sm text-center py-4">No votes yet. Be the first to vote!</p>
+        ) : (
+          <ul className="space-y-2">
+            {votes.map((v) => (
+              <li key={v.deploy_hash} className="text-sm border-b pb-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className={v.choice ? "text-green-500 font-bold" : "text-red-500 font-bold"}>
+                      {v.choice ? "✅ YES" : "❌ NO"}
+                    </span>
+                    {" "} by {v.voter_address.substring(0, 10)}...
+                  </div>
+                  <a 
+                    href={`https://testnet.cspr.live/deploy/${v.deploy_hash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-500 hover:underline text-xs"
+                  >
+                    View TX →
+                  </a>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {new Date(v.timestamp).toLocaleString()}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

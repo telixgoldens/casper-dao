@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { FaRocket, FaUsers, FaCheckCircle, FaWallet } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaRocket, FaCheckCircle, FaWallet } from 'react-icons/fa';
 import { useCasper } from '../context/CasperContext';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { deployCreateDao } from '../utils/casperService';
 
 export default function CreateDAO({ onDeploy }) {
@@ -11,21 +11,15 @@ export default function CreateDAO({ onDeploy }) {
     const {
         register,
         handleSubmit,
-        control,
-        watch,
         reset,
         formState: { errors }
     } = useForm({
         defaultValues: {
             name: '',
-            symbol: '',
-            quorum: 51,
-            minApproval: 20
+            description: '',
+            tokenAddress: 'hash-876899abd9c79c58809b095dadb1a1735ec3dbad58337794cfedc198dd8fd517'
         }
     });
-
-    const watchedQuorum = watch('quorum');
-    const watchedMin = watch('minApproval');
 
     const onSubmit = async (data) => {
         if (!activeKey) {
@@ -38,7 +32,7 @@ export default function CreateDAO({ onDeploy }) {
             const deployHash = await deployCreateDao(activeKey, data.name);
 
             alert(
-                `Deploy Sent!\nDAO Name: ${data.name}\nSymbol: ${data.symbol}\nHash: ${deployHash}\n\nCheck Casper Live in 1–2 mins.`
+                `DAO Creation Submitted!\n\nDAO Name: ${data.name}\nDeploy Hash: ${deployHash}\n\nYour DAO will appear in ~1 minute.\nCheck status on Casper Live.`
             );
 
             reset();
@@ -73,89 +67,136 @@ export default function CreateDAO({ onDeploy }) {
                             </div>
                         )}
 
+                        {!activeKey && (
+                            <div className="mb-6 pt-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+                                <div className="flex items-center gap-3">
+                                    <FaWallet className="text-yellow-400 text-xl" />
+                                    <div>
+                                        <p className="text-white font-semibold text-sm">Wallet Not Connected</p>
+                                        <p className="text-slate-400 text-xs">
+                                            Please connect your Casper Wallet to create a DAO
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="mb-6 pt-3">
                             <h2 className="text-3xl md:text-4xl font-extrabold text-white flex items-center gap-3">
                                 <FaRocket className="text-cyan-300" />
                                 <span>Launch New DAO</span>
                             </h2>
-                            <p className="text-slate-300 text-sm mt-2">Deploy governance contracts on Casper Network with customizable rules.</p>
+                            <p className="text-slate-300 text-sm mt-2">
+                                Deploy a governance DAO on Casper Network with token-based voting.
+                            </p>
                         </div>
 
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">DAO Name</label>
-                                    <input
-                                        {...register('name', { required: 'DAO name is required' })}
-                                        className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-slate-600"
-                                        placeholder="e.g. Solar Punk Treasury"
-                                    />
-                                    {errors.name && <p className="text-xs text-rose-400 mt-1">{errors.name.message}</p>}
-                                </div>
-                                <div className="space-y-2 pt-3">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Token Symbol</label>
-                                    <input
-                                        {...register('symbol', { required: 'Symbol is required', maxLength: { value: 6, message: 'Max 6 characters' } })}
-                                        className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-slate-600"
-                                        placeholder="e.g. SPT"
-                                    />
-                                    {errors.symbol && <p className="text-xs text-rose-400 mt-1">{errors.symbol.message}</p>}
-                                </div>
+                            {/* DAO Name */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    DAO Name *
+                                </label>
+                                <input
+                                    {...register('name', { 
+                                        required: 'DAO name is required',
+                                        minLength: { value: 3, message: 'Name must be at least 3 characters' },
+                                        maxLength: { value: 100, message: 'Name must be less than 100 characters' }
+                                    })}
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-slate-600"
+                                    placeholder="e.g. DeFi Treasury DAO"
+                                />
+                                {errors.name && (
+                                    <p className="text-xs text-rose-400 mt-1">{errors.name.message}</p>
+                                )}
                             </div>
-                            <div className="space-y-6 pt-4">
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-slate-300 flex items-center gap-2"><FaUsers className="text-cyan-400"/> Quorum</span>
-                                        <span className="text-cyan-400 font-bold">{watchedQuorum}%</span>
-                                    </div>
-                                    <Controller
-                                        control={control}
-                                        name="quorum"
-                                        render={({ field }) => (
-                                            <input
-                                                type="range"
-                                                min="1" max="100"
-                                                {...field}
-                                                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-                                            />
-                                        )}
-                                    />
-                                    <p className="text-[10px] text-slate-500">Percentage of total supply needed to validate a vote.</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-slate-300 flex items-center gap-2"><FaCheckCircle className="text-green-400"/> Min Approval</span>
-                                        <span className="text-green-400 font-bold">{watchedMin}%</span>
-                                    </div>
-                                    <Controller
-                                        control={control}
-                                        name="minApproval"
-                                        render={({ field }) => (
-                                            <input
-                                                type="range"
-                                                min="1" max="100"
-                                                {...field}
-                                                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500"
-                                            />
-                                        )}
-                                    />
-                                    <p className="text-[10px] text-slate-500">Minimum "Yes" votes required to pass a proposal.</p>
-                                </div>
+
+                            {/* DAO Description */}
+                            <div className="space-y-2 pt-3">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    DAO Description
+                                </label>
+                                <textarea
+                                    {...register('description', {
+                                        maxLength: { value: 1500, message: 'Description must be less than 1500 characters' }
+                                    })}
+                                    rows="4"
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-slate-600 resize-none"
+                                    placeholder="Describe your DAO's purpose, goals, and governance model..."
+                                />
+                                {errors.description && (
+                                    <p className="text-xs text-rose-400 mt-1">{errors.description.message}</p>
+                                )}
+                                <p className="text-[10px] text-slate-500">
+                                    Optional: Explain what your DAO will govern and its mission
+                                </p>
                             </div>
+
+                            {/* Token Address */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    Governance Token Address *
+                                </label>
+                                <input
+                                    {...register('tokenAddress', { 
+                                        required: 'Token address is required',
+                                        pattern: {
+                                            value: /^hash-[a-f0-9]{64}$/,
+                                            message: 'Must be a valid Casper contract hash (hash-...)'
+                                        }
+                                    })}
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-slate-600 font-mono text-sm"
+                                    placeholder="hash-..."
+                                />
+                                {errors.tokenAddress && (
+                                    <p className="text-xs text-rose-400 mt-1">{errors.tokenAddress.message}</p>
+                                )}
+                                <p className="text-[10px] text-slate-500">
+                                    The token contract that will be used for voting power
+                                </p>
+                            </div>
+
+                            {/* Info Box */}
+                            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                                <h4 className="text-white font-semibold text-sm mb-2">How it works:</h4>
+                                <ul className="text-slate-300 text-xs space-y-1 list-disc list-inside">
+                                    <li>Token holders can vote on proposals</li>
+                                    <li>Voting power is based on token balance</li>
+                                    <li>Each DAO starts with Proposal #1 active</li>
+                                    <li>Deploy cost: ~300 CSPR (gas fee)</li>
+                                </ul>
+                            </div>
+
+                            {/* Submit Button */}
                             <div className="pt-2">
                                 <button
                                     type="submit"
                                     disabled={!activeKey || isDeploying}
-                                    className={`w-full py-4 rounded-2xl font-bold text-lg tracking-wide uppercase transition-all btn-deploy 
-                                        ${isDeploying
+                                    className={`w-full py-4 rounded-2xl font-bold text-lg tracking-wide uppercase transition-all duration-300 btn-deploy
+                                        ${!activeKey
                                             ? "bg-slate-700 text-slate-400 cursor-not-allowed"
-                                            : "bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-[0_0_30px_rgba(6,182,212,0.32)] text-white"
+                                            : isDeploying
+                                            ? "bg-slate-700 text-slate-400 cursor-wait"
+                                            : "bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-[0_0_30px_rgba(6,182,212,0.32)] text-white hover:scale-[1.02]"
                                         }`}
                                 >
-                                    {isDeploying ? "Deploying..." : "Deploy DAO Contract"}
+                                    {isDeploying ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <span className="animate-spin">⚙️</span>
+                                            Deploying to Blockchain...
+                                        </span>
+                                    ) : !activeKey ? (
+                                        "Connect Wallet First"
+                                    ) : (
+                                        "🚀 Deploy DAO Contract"
+                                    )}
                                 </button>
                             </div>
 
+                            {/* Cost Estimate */}
+                            <p className="text-center text-xs text-slate-500">
+                                Estimated cost: ~300 CSPR | Network: Casper Testnet
+                            </p>
                         </form>
 
                     </div>

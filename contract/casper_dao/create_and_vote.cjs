@@ -21,7 +21,7 @@ const DAO_CONTRACT_HASH =
 const TOKEN_CONTRACT_HASH =
   process.argv[3] ||
   process.env.TOKEN_CONTRACT_HASH ||
-  "hash-c27539ac84749caebee898677d44fd3344b1772cbaf99f72897f47aad40cfea1";
+  "hash-876899abd9c79c58809b095dadb1a1735ec3dbad58337794cfedc198dd8fd517";
 
 async function loadKeys() {
   try {
