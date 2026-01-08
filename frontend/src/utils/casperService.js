@@ -141,7 +141,9 @@ export async function deployVote(userPublicKey, daoId, choice) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         signedDeploy: signedDeployJson,
-        deployJson: deployJson  // ← Send original deploy too!
+        deployJson: deployJson,
+        daoId: daoId,        
+        choice: choice
       })
     });
 

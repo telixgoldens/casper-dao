@@ -26,42 +26,94 @@ export default function ActiveDAOs() {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) return <div className="p-4">Loading DAOs...</div>;
+  if (loading) {
+    return (
+      <section className="min-h-screen bg-nebula bg-grid-texture flex items-start pt-28 pb-24">
+        <div className="hero-container w-full">
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-[#071022]/70 backdrop-blur-md p-10 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)]">
+              <p className="text-slate-300 text-center">Loading DAOs...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (daos.length === 0) {
     return (
-      <div className="p-4 border rounded bg-yellow-50 ">
-        <h3 className="font-bold text-lg">No Active DAOs Yet</h3>
-        <p className="text-sm mt-2">Create a DAO to get started! It will appear here after ~1 minute.</p>
-      </div>
+      <section className="min-h-screen bg-nebula bg-grid-texture flex items-start pt-28 pb-24">
+        <div className="hero-container w-full">
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-[#071022]/70 backdrop-blur-md p-10 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden">
+              <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
+              
+              <div className="mb-6 pt-3 bg-yellow-500/10 rounded-xl p-4">
+                <h3 className="font-bold text-lg text-white">No Active DAOs Yet</h3>
+                <p className="text-sm mt-2 text-slate-300">Create a DAO to get started! It will appear here after ~1 minute.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     );
   }
 
   return (
-    <section className="space-y-6 container bg-grid-texture">
-      <h2 className="text-2xl font-bold">Active DAOs</h2>
-      {daos.map(dao => (
-        <div key={dao.dao_id} className="border rounded-lg p-6 shadow-lg ">
-          <div className="mb-4">
-            <h3 className="text-xl font-bold text-blue-600">{dao.name}</h3>
-            <p className="text-sm text-gray-500 mt-1">DAO ID: {dao.dao_id}</p>
-            <p className="text-sm text-gray-500">
-              Creator: {dao.creator?.substring(0, 10)}...{dao.creator?.substring(dao.creator.length - 8)}
+    <section className="min-h-screen bg-nebula bg-grid-texture flex items-start pt-28 pb-24">
+      <div className="hero-container w-full">
+        <div className="max-w-5xl mx-auto space-y-6">
+          <div className="bg-[#071022]/70 backdrop-blur-md p-8 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden mb-6">
+            <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white pt-3">Active DAOs</h2>
+            <p className="text-slate-300 text-sm mt-2">
+              Vote on proposals and participate in governance
             </p>
-            <a 
-              href={`https://testnet.cspr.live/deploy/${dao.deploy_hash}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-500 hover:underline text-sm"
-            >
-              View Creation on Blockchain →
-            </a>
           </div>
-          
-          {/* Your existing ProposalResults component */}
-          <ProposalResults daoId={dao.dao_id} proposalId="1" />
+
+          {daos.map(dao => (
+            <div 
+              key={dao.dao_id} 
+              className="bg-[#071022]/70 backdrop-blur-md p-10 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden"
+            >
+              <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
+              
+              <div className="mb-6 pt-3">
+                <h3 className="text-2xl font-bold text-white mb-2">{dao.name}</h3>
+                
+                {dao.description && (
+                  <p className="text-slate-300 text-sm mb-3">{dao.description}</p>
+                )}
+                
+                <div className="space-y-1">
+                  <p className="text-xs text-slate-500 uppercase tracking-wider">DAO ID</p>
+                  <p className="text-sm text-slate-400 font-mono">{dao.dao_id}</p>
+                </div>
+                
+                <div className="space-y-1 mt-3">
+                  <p className="text-xs text-slate-500 uppercase tracking-wider">Creator</p>
+                  <p className="text-sm text-slate-400 font-mono">
+                    {dao.creator?.substring(0, 10)}...{dao.creator?.substring(dao.creator.length - 8)}
+                  </p>
+                </div>
+                
+                <a 
+                  href={`https://testnet.cspr.live/deploy/${dao.deploy_hash}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-block mt-3 text-cyan-400 hover:text-cyan-300 text-sm transition-colors"
+                >
+                  View Creation on Blockchain →
+                </a>
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-slate-700/50">
+                <ProposalResults daoId={dao.dao_id} proposalId="1" />
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </section>
   );
 }

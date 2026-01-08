@@ -18,7 +18,6 @@ export default function ProposalResults({ daoId, proposalId }) {
         const voteData = await voteRes.json();
         setVotes(voteData.votes || []);
 
-        // Check if current user has voted
         if (activeKey) {
           const userVoted = voteData.votes?.some(v => v.voter_address === activeKey);
           setHasVoted(userVoted);
@@ -54,7 +53,7 @@ export default function ProposalResults({ daoId, proposalId }) {
       const deployHash = await deployVote(activeKey, daoId, choice);
       
       alert(
-        `Vote Submitted!\n\nChoice: ${choice ? 'YES ✅' : 'NO ❌'}\nDeploy Hash: ${deployHash}\n\nYour vote will appear in ~1 minute.`
+        `Vote Submitted!\n\nChoice: ${choice ? 'YES ' : 'NO '}\nDeploy Hash: ${deployHash}\n\nYour vote will appear in ~1 minute.`
       );
 
       setHasVoted(true);
@@ -70,10 +69,9 @@ export default function ProposalResults({ daoId, proposalId }) {
   const noPercentage = stats ? Math.round((stats.no / (stats.total || 1)) * 100) : 0;
 
   return (
-    <div className="p-4 border rounded shadow">
+    <div className="p-4 border bg-grid-texture">
       <h3 className="text-lg font-bold mb-4">Live Results</h3>
       
-      {/* Vote Stats with Progress Bars */}
       {stats && (
         <div className="mb-6 space-y-3">
           <div className="flex justify-between text-sm">
@@ -81,7 +79,6 @@ export default function ProposalResults({ daoId, proposalId }) {
             <span className="font-bold">{stats.total}</span>
           </div>
 
-          {/* YES Progress */}
           <div>
             <div className="flex justify-between text-sm mb-1">
               <span className="text-green-600 font-semibold">YES</span>
@@ -95,7 +92,6 @@ export default function ProposalResults({ daoId, proposalId }) {
             </div>
           </div>
 
-          {/* NO Progress */}
           <div>
             <div className="flex justify-between text-sm mb-1">
               <span className="text-red-600 font-semibold">NO</span>
@@ -110,8 +106,7 @@ export default function ProposalResults({ daoId, proposalId }) {
           </div>
         </div>
       )}
-
-      {/* Voting Buttons */}
+  
       <div className="mb-6">
         {!activeKey ? (
           <div className="bg-yellow-100 border border-yellow-400 rounded p-3 text-center text-sm text-yellow-700">
@@ -119,7 +114,7 @@ export default function ProposalResults({ daoId, proposalId }) {
           </div>
         ) : hasVoted ? (
           <div className="bg-green-100 border border-green-400 rounded p-3 text-center text-sm text-green-700">
-            ✅ You have voted on this proposal
+            You have voted on this proposal
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -132,7 +127,7 @@ export default function ProposalResults({ daoId, proposalId }) {
                   : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
               }`}
             >
-              {isVoting ? '⏳ Voting...' : '✅ Vote YES'}
+              {isVoting ? 'Voting...' : 'Vote YES'}
             </button>
             <button
               onClick={() => handleVote(false)}
@@ -143,13 +138,12 @@ export default function ProposalResults({ daoId, proposalId }) {
                   : 'bg-red-600 hover:bg-red-700 hover:shadow-lg'
               }`}
             >
-              {isVoting ? '⏳ Voting...' : '❌ Vote NO'}
+              {isVoting ? 'Voting...' : 'Vote NO'}
             </button>
           </div>
         )}
       </div>
 
-      {/* Recent Votes List */}
       <div className="mt-6">
         <h4 className="font-semibold mb-3">Recent Votes (Blockchain Explorer)</h4>
         {votes.length === 0 ? (
@@ -161,7 +155,7 @@ export default function ProposalResults({ daoId, proposalId }) {
                 <div className="flex items-center justify-between">
                   <div>
                     <span className={v.choice ? "text-green-500 font-bold" : "text-red-500 font-bold"}>
-                      {v.choice ? "✅ YES" : "❌ NO"}
+                      {v.choice ? " YES" : " NO"}
                     </span>
                     {" "} by {v.voter_address.substring(0, 10)}...
                   </div>

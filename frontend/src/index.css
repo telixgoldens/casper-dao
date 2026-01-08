@@ -118,7 +118,17 @@ nav {
 }
 .btn-deploy{
     background-color: rgba(85, 122, 201);
-
+    
+  }
+.stats-box{
+    background-color: rgba(85, 122, 201);
+    border-radius: 15px;
+}
+.stats-box p{
+  color: rgba(7, 14, 50);;
+}
+.desc-box p{
+  text-decoration: none;
 }
 
 .nav-left {
@@ -141,6 +151,9 @@ nav {
   font-size: 1.05rem;
   color: rgba(255, 255, 255, 0.78);
   text-align: justify;
+}
+.suite-intro{
+margin-bottom: 25px;
 }
 
 .no-glow {

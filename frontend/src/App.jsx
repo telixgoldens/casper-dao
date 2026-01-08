@@ -67,14 +67,14 @@ function App() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto p-8  pt-3 container ">
-        <div className="mb-10 ">
+      <main className="max-w-6xl mx-auto p-8  pt-3 bg-grid-texture">
+        <div className="mb-10 container">
           <h1 className="text-3xl font-bold mb-2">Governance Dashboard</h1>
           <p className="text-gray-400">
             Manage your DAOs and participate in active votes.
           </p>
         </div>
-        <div className="flex gap-6 border-b border-gray-800 mb-8">
+        <div className="flex gap-6 border-b border-gray-800 mb-8 container">
           <button
             onClick={() => setActiveTab("create")}
             className={`pb-2 px-2 nav-active ${
@@ -96,7 +96,7 @@ function App() {
             Active Proposals
           </button>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 container">
           <div className="lg:col-span-2 space-y-6">
             {activeTab === "create" ? (
               <CreateDAO />

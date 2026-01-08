@@ -375,42 +375,44 @@ app.post("/prepare-vote", async (req, res) => {
 // Submit user-signed deploy
 app.post("/submit-signed-deploy", async (req, res) => {
   try {
-    const { signedDeploy, deployJson } = req.body;
+    const { signedDeploy, deployJson, daoId, choice } = req.body; // ← Add daoId and choice directly
     
     if (!signedDeploy || !deployJson) {
       return res.status(400).json({ error: "Missing signedDeploy or deployJson" });
     }
 
     console.log('📤 Submitting user-signed deploy...');
+    console.log('DAO ID from request:', daoId);
+    console.log('Choice from request:', choice);
 
-    // Parse what Casper Wallet sent back
     const walletResponse = typeof signedDeploy === 'string' ? JSON.parse(signedDeploy) : signedDeploy;
     const originalDeploy = typeof deployJson === 'string' ? JSON.parse(deployJson) : deployJson;
     
-    console.log('Wallet response signature:', walletResponse.signatureHex);
+    // Detect algorithm from public key
+    const accountHex = originalDeploy.header.account;
+    let algorithmPrefix;
     
-    // Get the signature hex
-    let signatureHex = walletResponse.signatureHex;
-    
-    // The signature needs algorithm prefix:
-    // Ed25519 = "01" prefix
-    // Secp256K1 = "02" prefix
-    // Most Casper Wallets use Ed25519
-    if (!signatureHex.startsWith('01') && !signatureHex.startsWith('02')) {
-      // Add Ed25519 prefix if missing
-      signatureHex = '01' + signatureHex;
-      console.log('Added Ed25519 prefix to signature');
+    if (accountHex.startsWith('01')) {
+      algorithmPrefix = '01'; // Ed25519
+      console.log('Detected Ed25519 key');
+    } else if (accountHex.startsWith('02')) {
+      algorithmPrefix = '02'; // Secp256K1
+      console.log('Detected Secp256K1 key');
+    } else {
+      throw new Error('Unknown key algorithm');
     }
     
-    console.log('Final signature:', signatureHex);
+    let signatureHex = walletResponse.signatureHex;
     
-    // Build the approval
+    if (!signatureHex.startsWith('01') && !signatureHex.startsWith('02')) {
+      signatureHex = algorithmPrefix + signatureHex;
+    }
+    
     const approval = {
       signer: originalDeploy.header.account,
       signature: signatureHex
     };
     
-    // Build final deploy with signature
     const finalDeploy = {
       hash: originalDeploy.hash,
       header: originalDeploy.header,
@@ -419,9 +421,8 @@ app.post("/submit-signed-deploy", async (req, res) => {
       approvals: [approval]
     };
     
-    console.log('Final deploy structure ready, submitting to RPC...');
+    console.log('Submitting to RPC...');
     
-    // Submit to network
     const response = await fetch(RPC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -443,33 +444,14 @@ app.post("/submit-signed-deploy", async (req, res) => {
     const deployHash = result.result.deploy_hash;
     console.log('✅ User-signed deploy submitted! Hash:', deployHash);
     
-    // Extract info for polling
-    let daoId = null;
-    let choice = false;
-    let voter = originalDeploy.header?.account;
+    // Use the DAO ID and choice from request params (more reliable)
+    const voter = originalDeploy.header?.account;
     
-    try {
-      if (originalDeploy.session?.StoredContractByHash?.args) {
-        const args = originalDeploy.session.StoredContractByHash.args;
-        const daoIdArg = args.find(a => a[0] === 'dao_id');
-        const choiceArg = args.find(a => a[0] === 'choice');
-        
-        if (daoIdArg) {
-          daoId = daoIdArg[1]?.parsed;
-        }
-        if (choiceArg) {
-          const choiceVal = choiceArg[1]?.parsed;
-          choice = choiceVal === 'true' || choiceVal === true;
-        }
-      }
-      
-      console.log('Extracted polling info:', { daoId, choice, voter });
-      
-      if (daoId && voter) {
-        pollForVoteExecution(deployHash, daoId, "1", choice, voter);
-      }
-    } catch (extractErr) {
-      console.error('Error extracting polling info:', extractErr.message);
+    if (daoId && voter) {
+      console.log(`Starting polling: DAO ${daoId}, Choice: ${choice ? 'YES' : 'NO'}, Voter: ${voter.substring(0, 10)}...`);
+      pollForVoteExecution(deployHash, daoId, "1", choice, voter);
+    } else {
+      console.log('⚠️ Missing daoId or voter, skipping polling');
     }
 
     res.json({ 
@@ -479,7 +461,6 @@ app.post("/submit-signed-deploy", async (req, res) => {
     
   } catch (err) {
     console.error("❌ Submit signed deploy error:", err);
-    console.error("Stack:", err.stack);
     res.status(500).json({ error: err.message });
   }
 });
@@ -770,6 +751,38 @@ app.post("/deploy-vote", async (req, res) => {
     lastDaoCreation = now;
   } catch (err) {
     console.error("❌ Vote deploy error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Manually check and save a vote from deploy hash
+app.post('/manual-check-vote', async (req, res) => {
+  try {
+    const { deployHash } = req.body;
+    
+    const response = await fetch(RPC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'info_get_deploy',
+        params: [deployHash]
+      })
+    });
+
+    const result = await response.json();
+    const executionResult = result.result?.execution_info?.execution_result?.Version2;
+    
+    if (executionResult && !executionResult.error_message) {
+      // Vote succeeded - save it
+      // You'll need to extract DAO ID, choice, voter from the deploy
+      // For now, just return success
+      res.json({ success: true, message: 'Vote executed successfully' });
+    } else {
+      res.json({ success: false, error: executionResult?.error_message });
+    }
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
