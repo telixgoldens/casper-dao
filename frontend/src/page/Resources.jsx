@@ -50,7 +50,6 @@ export default function Resources() {
             organizations on Casper Network.
           </p>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {resources.map((item, index) => (
             <a
@@ -70,7 +69,6 @@ export default function Resources() {
             </a>
           ))}
         </div>
-
         <div className="mt-16 bg-slate-800 rounded-2xl p-8 mb-4 ">
           <h3 className="text-2xl font-bold mb-6 text-teal-400">
             What is a DAO?
@@ -135,7 +133,6 @@ export default function Resources() {
                 150 CSPR, making governance affordable and accessible.
               </p>
             </details>
-
             <details className="bg-slate-800 rounded-lg p-4 cursor-pointer group">
               <summary className="font-semibold list-none flex justify-between items-center">
                 Can I upgrade my DAO rules later?
@@ -151,7 +148,6 @@ export default function Resources() {
                 address.
               </p>
             </details>
-
             <details className="bg-slate-800 rounded-lg p-4 cursor-pointer group">
               <summary className="font-semibold list-none flex justify-between items-center">
                 Do voters need to hold tokens to participate?
@@ -167,7 +163,6 @@ export default function Resources() {
                 spam and Sybil attacks.
               </p>
             </details>
-
             <details className="bg-slate-800 rounded-lg p-4 cursor-pointer group">
               <summary className="font-semibold list-none flex justify-between items-center">
                 How secure are the smart contracts?
@@ -183,7 +178,6 @@ export default function Resources() {
                 management. The codebase is open source for community auditing.
               </p>
             </details>
-
             <details className="bg-slate-800 rounded-lg p-4 cursor-pointer group">
               <summary className="font-semibold list-none flex justify-between items-center">
                 What happens if a proposal doesn't reach quorum?

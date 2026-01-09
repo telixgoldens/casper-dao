@@ -28,7 +28,7 @@ export default function ActiveDAOs() {
 
   if (loading) {
     return (
-      <section className="min-h-screen bg-nebula bg-grid-texture flex items-start pt-28 pb-24">
+      <section className="min-h-screen flex items-start pt-28 pb-24">
         <div className="hero-container w-full">
           <div className="max-w-3xl mx-auto">
             <div className="bg-[#071022]/70 backdrop-blur-md p-10 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)]">
@@ -63,7 +63,7 @@ export default function ActiveDAOs() {
     <section className="min-h-screen bg-nebula bg-grid-texture flex items-start pt-28 pb-24">
       <div className="hero-container w-full">
         <div className="max-w-5xl mx-auto space-y-6">
-          <div className="bg-[#071022]/70 backdrop-blur-md p-8 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden mb-6">
+          <div className="bg-[#071022]/70 backdrop-blur-md p-8 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden mb-3 ps-4">
             <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
             <h2 className="text-3xl md:text-4xl font-extrabold text-white pt-3">Active DAOs</h2>
             <p className="text-slate-300 text-sm mt-2">
@@ -74,7 +74,7 @@ export default function ActiveDAOs() {
           {daos.map(dao => (
             <div 
               key={dao.dao_id} 
-              className="bg-[#071022]/70 backdrop-blur-md p-10 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden"
+              className="bg-[#071022]/70 backdrop-blur-md p-10 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden border mt-3 p-4"
             >
               <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
               
@@ -86,15 +86,11 @@ export default function ActiveDAOs() {
                 )}
                 
                 <div className="space-y-1">
-                  <p className="text-xs text-slate-500 uppercase tracking-wider">DAO ID</p>
-                  <p className="text-sm text-slate-400 font-mono">{dao.dao_id}</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider">DAO ID : {dao.dao_id} </p>
                 </div>
                 
                 <div className="space-y-1 mt-3">
-                  <p className="text-xs text-slate-500 uppercase tracking-wider">Creator</p>
-                  <p className="text-sm text-slate-400 font-mono">
-                    {dao.creator?.substring(0, 10)}...{dao.creator?.substring(dao.creator.length - 8)}
-                  </p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider">Creator : {dao.creator?.substring(0, 10)}...{dao.creator?.substring(dao.creator.length - 8)}</p>
                 </div>
                 
                 <a 

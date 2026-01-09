@@ -77,8 +77,6 @@ nav {
   width: 100%;
   max-width: 1180px;
   padding: 64px 56px;
-  display: flex;
-  justify-content: space-between;
 }
 
 .hero-inner {
@@ -164,6 +162,12 @@ margin-bottom: 25px;
 .foot-bg{
   background-color: rgba(85, 122, 201);
 
+}
+.vote-yes{
+  background-color: green;
+}
+.vote-no{
+  background-color: red;
 }
 .foot-links strong{
   color: rgba(7, 14, 50);

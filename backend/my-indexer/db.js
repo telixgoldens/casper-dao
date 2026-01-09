@@ -4,14 +4,13 @@ const path = require('path');
 const dbPath = path.resolve(__dirname, 'votes.db');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('❌ Could not connect to SQLite database', err);
+    console.error('Could not connect to SQLite database', err);
   } else {
-    console.log('✅ Connected to SQLite database');
+    console.log('Connected to SQLite database');
   }
 });
 
 db.serialize(() => {
-  // Votes table
   db.run(`
     CREATE TABLE IF NOT EXISTS votes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +25,6 @@ db.serialize(() => {
     if (err) console.error("Error creating votes table:", err);
   });
   
-  // DAOs table with description
   db.run(`
     CREATE TABLE IF NOT EXISTS daos (
       dao_id TEXT PRIMARY KEY,

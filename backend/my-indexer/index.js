@@ -479,7 +479,7 @@ app.get('/votes/:proposalId', (req, res) => {
   );
 });
 
-// Get aggregated stats
+
 app.get('/stats/:daoId/:proposalId', (req, res) => {
   const { daoId, proposalId } = req.params;
 
@@ -506,33 +506,31 @@ app.get('/stats/:daoId/:proposalId', (req, res) => {
   );
 });
 
-// Deploy: Create DAO
+
 app.post("/deploy-create-dao", async (req, res) => {
   try {
     const { daoName, description, userPublicKey } = req.body;
     if (!daoName) return res.status(400).json({ error: "DAO name is required" });
 
-    console.log('📝 Creating DAO:', daoName);
-    console.log('👤 Requested by:', userPublicKey);
-    console.log('🪙 Token contract:', TOKEN_CONTRACT_HASH);
+    console.log(' Creating DAO:', daoName);
+    console.log('Requested by:', userPublicKey);
+    console.log('Token contract:', TOKEN_CONTRACT_HASH);
 
-    // Match the script EXACTLY
     const rawHash = TOKEN_CONTRACT_HASH.startsWith("hash-")
       ? TOKEN_CONTRACT_HASH.slice(5)
       : TOKEN_CONTRACT_HASH.replace(/^0x/, "");
 
-    // Build key bytes: [type_byte, ...hash_bytes]
-    const typePrefix = Buffer.from([1]); // 1 = Hash
+    const typePrefix = Buffer.from([1]); 
     const hashBuffer = Buffer.from(rawHash, 'hex');
     const keyBuffer = Buffer.concat([typePrefix, hashBuffer]);
 
-    console.log('Key buffer length:', keyBuffer.length); // Should be 33
+    console.log('Key buffer length:', keyBuffer.length); 
     console.log('Key buffer hex:', keyBuffer.toString('hex'));
 
     const argsMap = {
       name: CLValue.newCLString(daoName),
       token_address: CLValue.newCLByteArray(Uint8Array.from(keyBuffer)),
-      token_type: CLValue.newCLString("u256_address")  // ← Changed to match script!
+      token_type: CLValue.newCLString("u256_address")  
     };
 
     const args = Args.fromMap(argsMap);
@@ -556,7 +554,7 @@ app.post("/deploy-create-dao", async (req, res) => {
     console.log('Submitting...');
     const deployHash = await putDeployViaRPC(transaction);
 
-    console.log('✅ DAO deploy submitted! Deploy hash:', deployHash);
+    console.log('DAO deploy submitted! Deploy hash:', deployHash);
 
     pollForDaoCreation(deployHash, daoName, description, userPublicKey);
 
@@ -566,7 +564,7 @@ app.post("/deploy-create-dao", async (req, res) => {
       message: 'DAO creation submitted. Polling for execution...'
     });
   } catch (err) {
-    console.error("❌ DAO deploy error:", err);
+    console.error(" DAO deploy error:", err);
     console.error('Stack:', err.stack);
     res.status(500).json({ error: err.message });
   }
@@ -579,7 +577,6 @@ app.get('/verify-dao/:daoId', async (req, res) => {
     
     console.log('Verifying DAO on chain:', daoId);
     
-    // Get latest block
     const blockResponse = await fetch(RPC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -597,16 +594,14 @@ app.get('/verify-dao/:daoId', async (req, res) => {
       throw new Error(`Block Error: ${blockResult.error.message}`);
     }
 
-    // Get state_root_hash from Version2 block structure
     const stateRootHash = blockResult.result?.block_with_signatures?.block?.Version2?.header?.state_root_hash;
     
     if (!stateRootHash) {
       throw new Error('Could not get state root hash from block');
     }
 
-    console.log('✅ Got state root hash:', stateRootHash.substring(0, 20) + '...');
+    console.log(' Got state root hash:', stateRootHash.substring(0, 20) + '...');
 
-    // Get contract state
     const response = await fetch(RPC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -631,9 +626,8 @@ app.get('/verify-dao/:daoId', async (req, res) => {
 
     const namedKeys = result.result?.stored_value?.Contract?.named_keys || [];
     
-    console.log('✅ Total named keys in contract:', namedKeys.length);
+    console.log('Total named keys in contract:', namedKeys.length);
     
-    // Get all DAO keys
     const allDaoKeys = namedKeys
       .filter(k => k.name.startsWith('event_dao_created_'))
       .map(k => ({
@@ -641,10 +635,9 @@ app.get('/verify-dao/:daoId', async (req, res) => {
         dao_id: k.name.replace('event_dao_created_', '')
       }));
     
-    console.log('✅ Found DAO keys:', allDaoKeys.length);
-    console.log('📋 DAO IDs:', allDaoKeys.map(k => k.dao_id).join(', '));
+    console.log('Found DAO keys:', allDaoKeys.length);
+    console.log('DAO IDs:', allDaoKeys.map(k => k.dao_id).join(', '));
     
-    // Look for this specific DAO
     const daoEventKey = `event_dao_created_${daoId}`;
     const daoKey = namedKeys.find(key => key.name === daoEventKey);
     
@@ -652,14 +645,14 @@ app.get('/verify-dao/:daoId', async (req, res) => {
       res.json({ 
         exists: true,
         daoId,
-        message: `✅ DAO ${daoId} exists on chain!`,
+        message: `DAO ${daoId} exists on chain!`,
         allDaosOnChain: allDaoKeys
       });
     } else {
       res.json({ 
         exists: false,
         daoId,
-        message: `❌ DAO ${daoId} NOT found on chain`,
+        message: `DAO ${daoId} NOT found on chain`,
         allDaosOnChain: allDaoKeys,
         hint: allDaoKeys.length > 0 
           ? `Try voting with one of these DAO IDs: ${allDaoKeys.map(k => k.dao_id).join(', ')}` 
@@ -668,21 +661,16 @@ app.get('/verify-dao/:daoId', async (req, res) => {
     }
     
   } catch (err) {
-    console.error('❌ Error verifying DAO:', err);
+    console.error('Error verifying DAO:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-
-// Add endpoint to check if voter has tokens
 app.get('/check-voter-balance/:voterPublicKey', async (req, res) => {
   try {
     const { voterPublicKey } = req.params;
     
     console.log('Checking token balance for:', voterPublicKey);
-    
-    // This would need to query the token contract
-    // For now, just return info
     res.json({
       message: 'To vote, users need governance tokens',
       voterPublicKey,
@@ -697,7 +685,7 @@ app.get('/check-voter-balance/:voterPublicKey', async (req, res) => {
 
 let lastDaoCreation = 0;
 const COOLDOWN_MS = 10000; 
-// Deploy: Vote
+
 app.post("/deploy-vote", async (req, res) => {
   try {
      const now = Date.now();
@@ -711,11 +699,11 @@ app.post("/deploy-vote", async (req, res) => {
     if (daoId === undefined || choice === undefined) {
       return res.status(400).json({ error: "daoId and choice required" });
     }
-    console.log('🗳️ Voting on DAO:', daoId, '(type:', typeof daoId, ')');
+    console.log('Voting on DAO:', daoId, '(type:', typeof daoId, ')');
     console.log('BigInt value:', BigInt(daoId).toString());
 
-    console.log('🗳️ Voting on DAO:', daoId, '- Choice:', choice ? 'YES' : 'NO');
-    console.log('👤 Voter:', userPublicKey);
+    console.log('Voting on DAO:', daoId, '- Choice:', choice ? 'YES' : 'NO');
+    console.log(' Voter:', userPublicKey);
 
     const argsMap = {
       dao_id: CLValue.newCLUint64(BigInt(daoId)),
@@ -755,7 +743,7 @@ app.post("/deploy-vote", async (req, res) => {
   }
 });
 
-// Manually check and save a vote from deploy hash
+
 app.post('/manual-check-vote', async (req, res) => {
   try {
     const { deployHash } = req.body;
@@ -775,9 +763,6 @@ app.post('/manual-check-vote', async (req, res) => {
     const executionResult = result.result?.execution_info?.execution_result?.Version2;
     
     if (executionResult && !executionResult.error_message) {
-      // Vote succeeded - save it
-      // You'll need to extract DAO ID, choice, voter from the deploy
-      // For now, just return success
       res.json({ success: true, message: 'Vote executed successfully' });
     } else {
       res.json({ success: false, error: executionResult?.error_message });
@@ -787,7 +772,6 @@ app.post('/manual-check-vote', async (req, res) => {
   }
 });
 
-// Get all DAOs
 app.get('/daos', (req, res) => {
   db.all("SELECT * FROM daos ORDER BY created_at DESC", (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -795,7 +779,6 @@ app.get('/daos', (req, res) => {
   });
 });
 
-// Get all votes (debugging)
 app.get('/all-votes', (req, res) => {
   db.all("SELECT * FROM votes ORDER BY timestamp DESC", (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -803,7 +786,6 @@ app.get('/all-votes', (req, res) => {
   });
 });
 
-// Clear simulated votes
 app.get('/clear-simulated-votes', (req, res) => {
   db.run("DELETE FROM votes WHERE deploy_hash LIKE '0x%' AND length(deploy_hash) < 20", (err) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -815,7 +797,7 @@ app.get('/clear-simulated-votes', (req, res) => {
   });
 });
 
-// Extract DAO ID from deploy
+
 app.get('/extract-dao-id/:deployHash', async (req, res) => {
   try {
     const { deployHash } = req.params;
@@ -873,8 +855,8 @@ app.get('/extract-dao-id/:deployHash', async (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log('🚀 API running on port', PORT);
-  console.log('📡 RPC URL:', RPC_URL);
-  console.log('🔑 Public Key:', publicKey.toHex());
-  console.log('✅ Using NowNodes polling (no event stream)');
+  console.log(' API running on port', PORT);
+  console.log('RPC URL:', RPC_URL);
+  console.log('Public Key:', publicKey.toHex());
+  console.log('Using NowNodes polling (no event stream)');
 });

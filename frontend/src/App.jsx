@@ -96,8 +96,8 @@ function App() {
             Active Proposals
           </button>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 container">
-          <div className="lg:col-span-2 space-y-6">
+        <div className=" container">
+          <div className="">
             {activeTab === "create" ? (
               <CreateDAO />
             ) : (

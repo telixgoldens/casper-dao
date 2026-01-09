@@ -25,7 +25,6 @@ export default function Products() {
             Network.
           </p>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-4 mt-12">
           <div className="bg-slate-800 p-8 rounded-2xl transition-all group">
             <div className="w-15 h-15 bg-teal-500/10 rounded-xl flex items-start justify-start text-teal-400 transition-transform mb-2">
@@ -56,7 +55,6 @@ export default function Products() {
               </li>
             </ul>
           </div>
-
           <div className="bg-slate-800 p-8 rounded-2xl transition-all group">
             <div className="w-14 h-14 bg-purple-500/10 rounded-xl flex items-start justify-start text-purple-400 mb-2 transition-transform">
               <FaChartLine size={32} />
@@ -86,7 +84,6 @@ export default function Products() {
             </ul>
           </div>
         </div>
-
         <div className="">
           <h2 className="text-3xl font-bold text-center mb-3 text-white">
             Built for <span className="text-teal-400">Every Use Case</span>
@@ -118,7 +115,6 @@ export default function Products() {
             </div>
           </div>
         </div>
-
         <div className="mt-4 bg-gradient-to-br from-teal-900/20 to-purple-900/20 rounded-3xl p-10 ">
           <h3 className="text-2xl font-bold mb-8 text-center">
             Why Choose CasperDAO?

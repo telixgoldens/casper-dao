@@ -29,7 +29,6 @@ export default function LandingPage({ onConnect }) {
                     BUILD ON CASPER.
                   </span>
                 </h1>
-
                 <p className="">
                   Engineered for limitless scalability, uncompromised security,
                   and seamless upgradeability. The definitive enterprise-grade
@@ -37,7 +36,6 @@ export default function LandingPage({ onConnect }) {
                   Future-proof your vision on a network built to evolve with the
                   speed of innovation.
                 </p>
-
                 <div className="flex justify-start pt-4">
                   <button
                     onClick={onConnect}
@@ -70,7 +68,6 @@ export default function LandingPage({ onConnect }) {
                       Sub-second block finality for instant DAO governance
                     </p>
                   </div>
-
                   <div className="bg-slate-900/50 backdrop-blur-sm p-8 text-center hover:border-cyan-500/50 transition-all hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] mt-3 stats-box">
                     <div className="text-5xl font-bold bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-2">
                       Enterprise Grade
@@ -79,7 +76,6 @@ export default function LandingPage({ onConnect }) {
                       Bank-level security with Highway consensus protocol
                     </p>
                   </div>
-
                   <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-8 text-center hover:border-cyan-500/50 transition-all hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] mt-3 stats-box">
                     <div className="text-5xl font-bold bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-2">
                       Future Proof

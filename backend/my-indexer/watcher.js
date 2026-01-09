@@ -18,7 +18,7 @@ if (!EventSourceImpl) {
 }
 
 const startWatcher = () => {
-  console.log("👀 Indexer Watcher Started...");
+  console.log("Indexer Watcher Started...");
 
   const url = process.env.NODE_URL || "http://159.65.203.12:9999/events/main";
   

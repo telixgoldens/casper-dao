@@ -23,13 +23,13 @@ const deploy = async () => {
   let keys;
   try {
     keys = Keys.Ed25519.loadKeyPairFromPrivateFile(KEY_PATH);
-    console.log(`✅ Key loaded`);
+    console.log(`Key loaded`);
   } catch (err) {
     try {
       keys = Keys.Secp256K1.loadKeyPairFromPrivateFile(KEY_PATH);
-      console.log(`✅ Secp256k1 Key loaded!`);
+      console.log(`Secp256k1 Key loaded!`);
     } catch (e) {
-      console.error("❌ Key Error: Could not load .pem file.");
+      console.error("Key Error: Could not load .pem file.");
       return;
     }
   }
@@ -38,33 +38,32 @@ const deploy = async () => {
   try {
     const buffer = fs.readFileSync(WASM_PATH);
     wasmBytes = new Uint8Array(buffer);
-    console.log(`✅ WASM Size: ${wasmBytes.length} bytes`);
+    console.log(`WASM Size: ${wasmBytes.length} bytes`);
   } catch (err) {
-    console.error("❌ Error: Could not find WASM file at " + WASM_PATH);
+    console.error(" Error: Could not find WASM file at " + WASM_PATH);
     console.error(err.message);
     return;
   }
 
-  console.log("📝 Constructing CEP-18 Token Deploy with Mint/Burn enabled...");
+  console.log("Constructing CEP-18 Token Deploy with Mint/Burn enabled...");
   
-  // CEP-18 requires these arguments + enable_mint_burn
   const args = RuntimeArgs.fromMap({
     name: CLValue.string("DAO Token"),
     symbol: CLValue.string("DAOT"),
     decimals: CLValue.u8(9),
-    total_supply: CLValue.u256("1000000000000000000"), // 1 billion tokens
+    total_supply: CLValue.u256("1000000000000000000"),
     enable_mint_burn: CLValue.u8(1),
-    events_mode: CLValue.u8(1) // 🔥 THIS IS THE KEY! 1 = enabled, 0 = disabled
+    events_mode: CLValue.u8(1) 
   });
 
   const params = new DeployUtil.DeployParams(keys.publicKey, NETWORK_NAME);
   const session = DeployUtil.ExecutableDeployItem.newModuleBytes(wasmBytes, args);
-  const payment = DeployUtil.standardPayment(500000000000); // 200 CSPR
+  const payment = DeployUtil.standardPayment(500000000000); 
 
   let deploy = DeployUtil.makeDeploy(params, session, payment);
   deploy = DeployUtil.signDeploy(deploy, keys); 
 
-  console.log(`📡 Searching for active node...`);
+  console.log(`Searching for active node...`);
 
   for (let node of NODES) {
       process.stdout.write(`Trying ${node} ... `);
@@ -75,13 +74,13 @@ const deploy = async () => {
           
           const hash = await client.putDeploy(deploy);
           
-          console.log(`✅ CONNECTED!`);
+          console.log(`CONNECTED!`);
           console.log('');
-          console.log('🎉 TOKEN CONTRACT DEPLOYED WITH MINT/BURN ENABLED!');
+          console.log('TOKEN CONTRACT DEPLOYED WITH MINT/BURN ENABLED!');
           console.log(`Deploy Hash: ${hash}`);
           console.log(`Monitor: https://testnet.cspr.live/deploy/${hash}`);
           console.log('');
-          console.log(`⏳ NEXT STEPS:`);
+          console.log(`NEXT STEPS:`);
           console.log(`1. Wait ~2 minutes for execution`);
           console.log(`2. Click the link above`);
           console.log(`3. Find 'Contract Hash' in Execution Results`);
@@ -91,11 +90,11 @@ const deploy = async () => {
           console.log('');
           return; 
       } catch (err) {
-          console.log(`❌ Failed.`);
+          console.log(`Failed.`);
       }
   }
   
-  console.error("❌ ALL NODES FAILED.");
+  console.error(" ALL NODES FAILED.");
 };
 
 deploy();

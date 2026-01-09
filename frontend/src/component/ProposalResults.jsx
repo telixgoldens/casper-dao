@@ -10,6 +10,21 @@ export default function ProposalResults({ daoId, proposalId }) {
   const [stats, setStats] = useState(null);
   const [isVoting, setIsVoting] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertVariant, setAlertVariant] = useState("success");
+  const [alertMessage, setAlertMessage] = useState("");
+
+   React.useEffect(() => {
+      if (!showAlert) return;
+  
+      const handleClick = () => setShowAlert(false);
+      document.addEventListener("click", handleClick);
+  
+      return () => {
+        document.removeEventListener("click", handleClick);
+      };
+    }, [showAlert]);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,7 +54,7 @@ export default function ProposalResults({ daoId, proposalId }) {
 
   const handleVote = async (choice) => {
     if (!activeKey) {
-      alert('Please connect your wallet first!');
+      setShowAlert(true);
       return;
     }
 
@@ -52,14 +67,18 @@ export default function ProposalResults({ daoId, proposalId }) {
     try {
       const deployHash = await deployVote(activeKey, daoId, choice);
       
-      alert(
+      setAlertVariant("success");
+      setAlertMessage(
         `Vote Submitted!\n\nChoice: ${choice ? 'YES ' : 'NO '}\nDeploy Hash: ${deployHash}\n\nYour vote will appear in ~1 minute.`
       );
+      setShowAlert(true);
 
       setHasVoted(true);
     } catch (err) {
       console.error('Vote error:', err);
-      alert('Vote failed: ' + err.message);
+      setAlertVariant("danger");
+      setAlertMessage('Vote failed: ' + err.message);
+      setShowAlert(true);
     } finally {
       setIsVoting(false);
     }
@@ -69,9 +88,13 @@ export default function ProposalResults({ daoId, proposalId }) {
   const noPercentage = stats ? Math.round((stats.no / (stats.total || 1)) * 100) : 0;
 
   return (
-    <div className="p-4 border bg-grid-texture">
-      <h3 className="text-lg font-bold mb-4">Live Results</h3>
-      
+    <div className=" ">
+      <h3 className="text-lg font-bold mb-4 pt-3">Live Results</h3>
+       {showAlert && (
+              <Alert variant={alertVariant} onClick={() => setShowAlert(false)}>
+                {alertMessage}
+              </Alert>
+            )}
       {stats && (
         <div className="mb-6 space-y-3">
           <div className="flex justify-between text-sm">
@@ -113,7 +136,7 @@ export default function ProposalResults({ daoId, proposalId }) {
             Connect your wallet to vote
           </div>
         ) : hasVoted ? (
-          <div className="bg-green-100 border border-green-400 rounded p-3 text-center text-sm text-green-700">
+          <div className="bg-green-100 border border-green-400 rounded p-3 text-center text-sm text-green-700 vote-yes">
             You have voted on this proposal
           </div>
         ) : (
@@ -121,7 +144,7 @@ export default function ProposalResults({ daoId, proposalId }) {
             <button
               onClick={() => handleVote(true)}
               disabled={isVoting}
-              className={`py-3 px-4 rounded-lg font-bold text-white transition-all ${
+              className={`py-3 px-4 rounded-lg font-bold text-white transition-all vote-yes ${
                 isVoting
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'
@@ -132,7 +155,7 @@ export default function ProposalResults({ daoId, proposalId }) {
             <button
               onClick={() => handleVote(false)}
               disabled={isVoting}
-              className={`py-3 px-4 rounded-lg font-bold text-white transition-all ${
+              className={`py-3 px-4 rounded-lg font-bold text-white transition-all vote-no ${
                 isVoting
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-red-600 hover:bg-red-700 hover:shadow-lg'
@@ -144,14 +167,14 @@ export default function ProposalResults({ daoId, proposalId }) {
         )}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-3">
         <h4 className="font-semibold mb-3">Recent Votes (Blockchain Explorer)</h4>
         {votes.length === 0 ? (
           <p className="text-gray-500 text-sm text-center py-4">No votes yet. Be the first to vote!</p>
         ) : (
           <ul className="space-y-2">
             {votes.map((v) => (
-              <li key={v.deploy_hash} className="text-sm border-b pb-2">
+              <li key={v.deploy_hash} className="text-sm border-b pb-1 pt-1">
                 <div className="flex items-center justify-between">
                   <div>
                     <span className={v.choice ? "text-green-500 font-bold" : "text-red-500 font-bold"}>

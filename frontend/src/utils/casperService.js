@@ -92,11 +92,6 @@ export const deployCreateDao = async (userPublicKey, daoName) => {
   }
 };
 
-
-
-
-// Update the deployVote function in frontend/src/utils/casperService.js
-
 export async function deployVote(userPublicKey, daoId, choice) {
   try {
     if (!window.CasperWalletProvider) {
@@ -105,7 +100,6 @@ export async function deployVote(userPublicKey, daoId, choice) {
 
     console.log('Preparing vote deploy...');
     
-    // Step 1: Get unsigned deploy from backend
     const prepareResponse = await fetch(`${BACKEND_URL}/prepare-vote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -125,7 +119,6 @@ export async function deployVote(userPublicKey, daoId, choice) {
     
     console.log('Deploy prepared, requesting user signature...');
     
-    // Step 2: Have user sign with Casper Wallet
     const provider = window.CasperWalletProvider();
     
     const signedDeployJson = await provider.sign(
@@ -135,7 +128,6 @@ export async function deployVote(userPublicKey, daoId, choice) {
 
     console.log('Deploy signed by user, submitting to network...');
     
-    // Step 3: Submit BOTH the signature AND original deploy
     const submitResponse = await fetch(`${BACKEND_URL}/submit-signed-deploy`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -154,7 +146,7 @@ export async function deployVote(userPublicKey, daoId, choice) {
 
     const result = await submitResponse.json();
     
-    console.log('✅ Vote submitted!', result.deployHash);
+    console.log('Vote submitted!', result.deployHash);
     
     return result.deployHash;
     
