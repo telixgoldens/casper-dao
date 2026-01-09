@@ -54,7 +54,7 @@ async function run() {
       }
 
       if (!contractHashToUse) {
-          console.log(`⚠️ Auto-detect failed. Using fallback hash: ${HARDCODED_HASH}`);
+          console.log(`Auto-detect failed. Using fallback hash: ${HARDCODED_HASH}`);
           contractHashToUse = HARDCODED_HASH;
       }
 

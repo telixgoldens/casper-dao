@@ -11,10 +11,8 @@ const NODES = [
 const NETWORK = 'casper-test';
 const KEY_PATH = 'C:/Users/HP/Desktop/casperkeys/secret_key.pem';
 const TOKEN_CONTRACT_HASH = 'hash-a0204a44f72b02bc00c793fc696a306277f315d0ec860b66d11336b1b993a9fc';
-
-// Command line args: node mint_token.js <recipient_public_key> <amount>
 const RECIPIENT = process.argv[2] || '013d310c09a7ad350a30b3960ede64399415ac8f75fbc3f6e7d336f0a3daccef01';
-const AMOUNT = process.argv[3] || '10000000000000'; // 100 tokens with 9 decimals
+const AMOUNT = process.argv[3] || '10000000000000'; 
 
 function toHashBytes(h) { 
   const s = h.startsWith('hash-') ? h.slice(5) : h.replace(/^0x/, ''); 
@@ -42,22 +40,20 @@ async function waitForExecution(client, deployHash, timeoutMs=120000){
 }
 
 (async ()=>{
-  console.log('🪙 Minting DAO Governance Tokens...');
-  console.log('🎯 Recipient:', RECIPIENT);
-  console.log('💰 Amount:', AMOUNT);
+  console.log('Minting DAO Governance Tokens...');
+  console.log('Recipient:', RECIPIENT);
+  console.log('Amount:', AMOUNT);
   console.log('');
 
   const keys = await loadKeys();
-  console.log('✅ Key loaded');
+  console.log('Key loaded');
   
-  // For minting to self - simplest approach
-  // The owner is the contract deployer (minter)
   const args = RuntimeArgs.fromMap({
     owner: CLValue.byteArray(keys.publicKey.toAccountHash()),
     amount: CLValue.u256(AMOUNT)
   });
 
-  console.log('📡 Searching for active node...');
+  console.log('Searching for active node...');
   
   let deployed = false;
   for(const node of NODES){
@@ -75,47 +71,47 @@ async function waitForExecution(client, deployHash, timeoutMs=120000){
         'mint',
         args
       );
-      const payment = DeployUtil.standardPayment(800000000000); // 5 CSPR
+      const payment = DeployUtil.standardPayment(800000000000); 
       
       let deploy = DeployUtil.makeDeploy(params, session, payment);
       deploy = DeployUtil.signDeploy(deploy, keys);
       
       const dh = await client.putDeploy(deploy);
       
-      console.log('✅ CONNECTED!');
+      console.log('CONNECTED!');
       console.log('');
-      console.log('🎉 TOKENS MINTED!');
+      console.log('TOKENS MINTED!');
       console.log('Deploy Hash:', dh);
       console.log(`Monitor: https://testnet.cspr.live/deploy/${dh}`);
       console.log('');
-      console.log('⏳ Waiting for execution...');
+      console.log('Waiting for execution...');
       
       try {
         const exec = await waitForExecution(client, dh);
         
         if(exec.execution_result?.Version2?.error_message){
-          console.error('❌ Execution failed:', exec.execution_result.Version2.error_message);
+          console.error('Execution failed:', exec.execution_result.Version2.error_message);
         } else {
-          console.log('✅ Execution successful!');
+          console.log('Execution successful!');
           console.log('Tokens minted to your account!');
           console.log('');
           console.log('Now update your backend TOKEN_CONTRACT_HASH and restart it.');
           console.log('Then you can create a DAO and vote!');
         }
       } catch(waitErr){
-        console.log('⚠️ Could not wait for execution (check cspr.live manually)');
+        console.log('Could not wait for execution (check cspr.live manually)');
       }
       
       deployed = true;
       return;
       
     } catch(err){
-      console.log('❌ Failed.');
+      console.log('Failed.');
       console.error(err.message);
     }
   }
   
   if(!deployed){
-    console.error('❌ ALL NODES FAILED.');
+    console.error('ALL NODES FAILED.');
   }
 })();

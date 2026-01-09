@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useCasper } from '../context/CasperContext';
 import { deployVote } from '../utils/casperService';
+import Alert from "react-bootstrap/Alert";
+
 
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:3001";
 
@@ -14,7 +16,7 @@ export default function ProposalResults({ daoId, proposalId }) {
   const [alertVariant, setAlertVariant] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
 
-   React.useEffect(() => {
+   useEffect(() => {
       if (!showAlert) return;
   
       const handleClick = () => setShowAlert(false);
@@ -59,7 +61,10 @@ export default function ProposalResults({ daoId, proposalId }) {
     }
 
     if (hasVoted) {
-      alert('You have already voted on this proposal!');
+     setAlertVariant("warning");
+     setAlertMessage("You have already voted on this proposal.");
+     setShowAlert(true);
+
       return;
     }
 
