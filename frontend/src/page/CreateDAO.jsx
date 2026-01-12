@@ -49,7 +49,7 @@ export default function CreateDAO({ onDeploy }) {
 
     setIsDeploying(true);
     try {
-      const deployHash = await deployCreateDao(activeKey, data.name);
+      const deployHash = await deployCreateDao(activeKey, sanitizedName);
 
       setAlertVariant("success");
       setAlertMessage(`DAO "${data.name}" submitted successfully.  You can monitor deployment status on Casper Live. Deploy Hash:
