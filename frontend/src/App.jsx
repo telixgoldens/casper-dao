@@ -7,6 +7,7 @@ import { deployVote } from "./utils/casperService";
 import Footer from "./component/Footer";
 import ActiveDAOs from "./component/ActiveDaos";
 
+
 const DAO_ID = "123";
 const PROPOSAL_ID = "1";
 
@@ -41,6 +42,7 @@ function App() {
     activeTab === "create" ? "bg-nebula bg-grid-texture" : "bg-slate-900";
 
   return (
+    
     <div
       className={`min-h-screen ${mainBg} text-white font-sans selection:bg-teal-500 selection:text-black`}
     >

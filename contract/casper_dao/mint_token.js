@@ -10,9 +10,9 @@ const NODES = [
 
 const NETWORK = 'casper-test';
 const KEY_PATH = 'C:/Users/HP/Desktop/casperkeys/secret_key.pem';
-const TOKEN_CONTRACT_HASH = 'hash-a0204a44f72b02bc00c793fc696a306277f315d0ec860b66d11336b1b993a9fc';
-const RECIPIENT = process.argv[2] || '013d310c09a7ad350a30b3960ede64399415ac8f75fbc3f6e7d336f0a3daccef01';
-const AMOUNT = process.argv[3] || '10000000000000'; 
+const TOKEN_CONTRACT_HASH = 'hash-876899abd9c79c58809b095dadb1a1735ec3dbad58337794cfedc198dd8fd517';
+const RECIPIENT = process.argv[2] || '020361a80d6e1b777b9bebe62f003c44f6db42bdb5eb368d282c7c065f8fb61cf127';
+const AMOUNT = process.argv[3] || '200000000000'; 
 
 function toHashBytes(h) { 
   const s = h.startsWith('hash-') ? h.slice(5) : h.replace(/^0x/, ''); 
@@ -48,10 +48,11 @@ async function waitForExecution(client, deployHash, timeoutMs=120000){
   const keys = await loadKeys();
   console.log('Key loaded');
   
-  const args = RuntimeArgs.fromMap({
-    owner: CLValue.byteArray(keys.publicKey.toAccountHash()),
-    amount: CLValue.u256(AMOUNT)
-  });
+  
+  const argsMap = {
+  owner: CLValue.newCLByteArray(Uint8Array.from(Buffer.from(RECIPIENT, 'hex'))),
+  amount: CLValue.newCLUint256(AMOUNT)
+};
 
   console.log('Searching for active node...');
   

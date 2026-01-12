@@ -3,7 +3,6 @@ import { useCasper } from '../context/CasperContext';
 import { deployVote } from '../utils/casperService';
 import Alert from "react-bootstrap/Alert";
 
-
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:3001";
 
 export default function ProposalResults({ daoId, proposalId }) {
@@ -12,21 +11,42 @@ export default function ProposalResults({ daoId, proposalId }) {
   const [stats, setStats] = useState(null);
   const [isVoting, setIsVoting] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
+  const [checkingVote, setCheckingVote] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
 
-   useEffect(() => {
-      if (!showAlert) return;
-  
-      const handleClick = () => setShowAlert(false);
-      document.addEventListener("click", handleClick);
-  
-      return () => {
-        document.removeEventListener("click", handleClick);
-      };
-    }, [showAlert]);
-  
+  useEffect(() => {
+    if (!showAlert) return;
+
+    const handleClick = () => setShowAlert(false);
+    document.addEventListener("click", handleClick);
+
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, [showAlert]);
+    
+  useEffect(() => {
+    const checkIfVoted = async () => {
+      if (!activeKey || !daoId) {
+        setCheckingVote(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/has-voted/${daoId}/${activeKey}`);
+        const data = await response.json();
+        setHasVoted(data.hasVoted);
+      } catch (err) {
+        console.error('Error checking vote status:', err);
+      } finally {
+        setCheckingVote(false);
+      }
+    };
+
+    checkIfVoted();
+  }, [activeKey, daoId]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,11 +54,6 @@ export default function ProposalResults({ daoId, proposalId }) {
         const voteRes = await fetch(`${API_URL}/votes/${proposalId}`);
         const voteData = await voteRes.json();
         setVotes(voteData.votes || []);
-
-        if (activeKey) {
-          const userVoted = voteData.votes?.some(v => v.voter_address === activeKey);
-          setHasVoted(userVoted);
-        }
 
         const statRes = await fetch(`${API_URL}/stats/${daoId}/${proposalId}`);
         const statData = await statRes.json();
@@ -49,22 +64,23 @@ export default function ProposalResults({ daoId, proposalId }) {
     };
 
     fetchData(); 
-    const interval = setInterval(fetchData, 3000); 
+    const interval = setInterval(fetchData, 10000); 
 
     return () => clearInterval(interval);
-  }, [daoId, proposalId, activeKey]);
+  }, [daoId, proposalId]); 
 
   const handleVote = async (choice) => {
     if (!activeKey) {
+      setAlertVariant("warning");
+      setAlertMessage("Please connect your wallet to vote.");
       setShowAlert(true);
       return;
     }
 
     if (hasVoted) {
-     setAlertVariant("warning");
-     setAlertMessage("You have already voted on this proposal.");
-     setShowAlert(true);
-
+      setAlertVariant("warning");
+      setAlertMessage("You have already voted on this DAO.");
+      setShowAlert(true);
       return;
     }
 
@@ -74,11 +90,20 @@ export default function ProposalResults({ daoId, proposalId }) {
       
       setAlertVariant("success");
       setAlertMessage(
-        `Vote Submitted!\n\nChoice: ${choice ? 'YES ' : 'NO '}\nDeploy Hash: ${deployHash}\n\nYour vote will appear in ~1 minute.`
+        `Vote Submitted!\n\nChoice: ${choice ? 'YES' : 'NO'}\nDeploy Hash: ${deployHash}\n\nYour vote will appear in ~1 minute.`
       );
       setShowAlert(true);
-
       setHasVoted(true);
+      setTimeout(async () => {
+        try {
+          const statRes = await fetch(`${API_URL}/stats/${daoId}/${proposalId}`);
+          const statData = await statRes.json();
+          setStats(statData);
+        } catch (err) {
+          console.error('Error refreshing stats:', err);
+        }
+      }, 2000);
+
     } catch (err) {
       console.error('Vote error:', err);
       setAlertVariant("danger");
@@ -92,14 +117,24 @@ export default function ProposalResults({ daoId, proposalId }) {
   const yesPercentage = stats ? Math.round((stats.yes / (stats.total || 1)) * 100) : 0;
   const noPercentage = stats ? Math.round((stats.no / (stats.total || 1)) * 100) : 0;
 
+  if (checkingVote) {
+    return (
+      <div className="bg-slate-900/50 rounded-xl p-6">
+        <p className="text-slate-400 text-center">Checking vote status...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className=" ">
+    <div className="">
       <h3 className="text-lg font-bold mb-4 pt-3">Live Results</h3>
-       {showAlert && (
-              <Alert variant={alertVariant} onClick={() => setShowAlert(false)}>
-                {alertMessage}
-              </Alert>
-            )}
+      
+      {showAlert && (
+        <Alert variant={alertVariant} onClick={() => setShowAlert(false)}>
+          {alertMessage}
+        </Alert>
+      )}
+      
       {stats && (
         <div className="mb-6 space-y-3">
           <div className="flex justify-between text-sm">
@@ -142,7 +177,7 @@ export default function ProposalResults({ daoId, proposalId }) {
           </div>
         ) : hasVoted ? (
           <div className="bg-green-100 border border-green-400 rounded p-3 text-center text-sm text-green-700 vote-yes">
-            You have voted on this proposal
+            You have already voted on this DAO
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -183,7 +218,7 @@ export default function ProposalResults({ daoId, proposalId }) {
                 <div className="flex items-center justify-between">
                   <div>
                     <span className={v.choice ? "text-green-500 font-bold" : "text-red-500 font-bold"}>
-                      {v.choice ? " YES" : " NO"}
+                      {v.choice ? "YES" : "NO"}
                     </span>
                     {" "} by {v.voter_address.substring(0, 10)}...
                   </div>

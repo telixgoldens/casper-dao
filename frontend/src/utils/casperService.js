@@ -156,9 +156,9 @@ export async function deployVote(userPublicKey, daoId, choice) {
   }
 }
 
-export const getVotes = async (proposalId) => {
+export const getVotes = async (proposalId, daoId) => {
   try {
-    const response = await fetch(`${BACKEND_URL}/votes/${proposalId}`);
+    const response = await fetch(`${BACKEND_URL}/votes/${proposalId}/${daoId}`);
     const data = await response.json();
     
     if (!response.ok) {

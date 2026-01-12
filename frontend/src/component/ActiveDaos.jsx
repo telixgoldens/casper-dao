@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import ProposalResults from './ProposalResults'; 
+import Faucet from "./Faucet"
 
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:3001";
 
@@ -63,11 +64,12 @@ export default function ActiveDAOs() {
     <section className="min-h-screen bg-nebula bg-grid-texture flex items-start pt-28 pb-24">
       <div className="hero-container w-full">
         <div className="max-w-5xl mx-auto space-y-6">
+           <Faucet />
           <div className="bg-[#071022]/70 backdrop-blur-md p-8 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden mb-3 ps-4">
             <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
             <h2 className="text-3xl md:text-4xl font-extrabold text-white pt-3">Active DAOs</h2>
             <p className="text-slate-300 text-sm mt-2">
-              Vote on proposals and participate in governance
+              Claim DOAT token, then Vote on proposals and participate in governance
             </p>
           </div>
 

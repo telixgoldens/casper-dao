@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { FaGhost } from "react-icons/fa";
 import Ghostimg from "../assets/ghostjpg.png";
+import Offcanvas from 'react-bootstrap/Offcanvas';
 import Footer from "../component/Footer";
 import Products from "./Products";
 import Resources from "./Resources";
 import Contacts from "./Contacts";
+import menuFont from '../assets/menu_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg'
 
 
 export default function LandingPage({ onConnect }) {
   const [currentView, setCurrentView] = useState("home");
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   const renderContent = () => {
     switch (currentView) {
@@ -129,10 +134,33 @@ export default function LandingPage({ onConnect }) {
           <FaGhost className="text-cyan-400" />
           <span>Casper Dao</span>
         </div>
+        
+    <div className='d-md-block d-lg-none mt-2'>
+      <div className='d-lg-none' onClick={handleShow}>
+        <img className='menu-img' src={menuFont} alt="menu-font" />
+      </div>
+      <Offcanvas show={show} onHide={handleClose} responsive="lg w-75" className="bg-primary">
+        <Offcanvas.Header closeButton>
+          {/* <Offcanvas.Title>Responsive offcanvas</Offcanvas.Title> */}
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+        <ul className="my-4 list-unstyled text-white">
+  <li onClick={() => { setCurrentView("Products"); handleClose(); }}>
+    Products
+  </li>
+  <li onClick={() => { setCurrentView("Resources"); handleClose(); }}>
+    Resources
+  </li>
+  <li onClick={() => { setCurrentView("Contacts"); handleClose(); }}>
+    Contacts
+  </li>
+</ul>
 
-        <div></div>
+        </Offcanvas.Body>
+      </Offcanvas>
+        </div>
 
-        <div className="d-flex gap-5 text-sm font-medium text-slate-300 ghost-map">
+        <div className="d-flex gap-5 text-sm font-medium text-slate-300 ghost-map d-none d-md-block ">
           {["Products", "Resources", "Contacts"].map((item) => (
             <a
               key={item}
@@ -149,8 +177,9 @@ export default function LandingPage({ onConnect }) {
             </a>
           ))}
         </div>
+   
 
-        <div className="flex items-center bg-cyan-500/10 gap-6 nav-right">
+        <div className="flex items-center bg-cyan-500/10 gap-6 nav-right d-none d-md-block">
           <button
             onClick={onConnect}
             className="rounded-full hover:shadow-[0_0_40px_rgba(6,182,212,0.4)] nav-right-connect"
