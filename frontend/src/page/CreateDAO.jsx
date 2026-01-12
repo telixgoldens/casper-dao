@@ -42,6 +42,10 @@ export default function CreateDAO({ onDeploy }) {
       setShowAlert(true);
       return;
     }
+    const sanitizedName = data.name
+    .replace(/[–—]/g, '-')  
+    .replace(/[^\x00-\x7F]/g, '')  
+    .trim();
 
     setIsDeploying(true);
     try {
@@ -53,7 +57,7 @@ export default function CreateDAO({ onDeploy }) {
       setShowAlert(true);
 
       reset();
-      if (onDeploy) onDeploy({ ...data, deployHash });
+      if (onDeploy) onDeploy({ ...data, name: sanitizedName,  deployHash });
     } catch (err) {
       console.error(err);
       setAlertVariant("danger");
