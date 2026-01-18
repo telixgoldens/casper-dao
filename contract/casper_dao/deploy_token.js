@@ -48,8 +48,8 @@ const deploy = async () => {
   console.log("Constructing CEP-18 Token Deploy with Mint/Burn enabled...");
   
   const args = RuntimeArgs.fromMap({
-    name: CLValue.string("DAO Token"),
-    symbol: CLValue.string("DAOT"),
+    name: CLValue.string("DAO Governance Token2"),
+    symbol: CLValue.string("DGOT"),
     decimals: CLValue.u8(9),
     total_supply: CLValue.u256("1000000000000000000"),
     enable_mint_burn: CLValue.u8(1),

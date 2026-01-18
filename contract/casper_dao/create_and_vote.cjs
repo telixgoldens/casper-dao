@@ -17,11 +17,11 @@ const KEY_PATH =
 const DAO_CONTRACT_HASH =
   process.argv[2] ||
   process.env.DAO_CONTRACT_HASH ||
-  "hash-5602ff70a5643b82d87302db480387a62d5993a5d2c267e8e88fd93a14e5c368";
+  "hash-511efb42d9ae1f6fa233615a9ef730b88387aeb81524e8acc4865a1f08093f75";
 const TOKEN_CONTRACT_HASH =
   process.argv[3] ||
   process.env.TOKEN_CONTRACT_HASH ||
-  "hash-876899abd9c79c58809b095dadb1a1735ec3dbad58337794cfedc198dd8fd517";
+  "hash-92a2dd97639d61dcb8460e512032a7de561f61b735cec478c474afc926123990";
 
 async function loadKeys() {
   try {

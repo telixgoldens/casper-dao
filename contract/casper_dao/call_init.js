@@ -10,7 +10,7 @@ const NODES = [
 const NETWORK_NAME = "casper-test";
 const KEY_PATH = "C:/Users/HP/Desktop/casperkeys/secret_key.pem"; 
 
-const HARDCODED_HASH = "hash-5602ff70a5643b82d87302db480387a62d5993a5d2c267e8e88fd93a14e5c368";
+const HARDCODED_HASH = "hash-511efb42d9ae1f6fa233615a9ef730b88387aeb81524e8acc4865a1f08093f75";
 
 async function run() {
   let keys;
@@ -44,7 +44,7 @@ async function run() {
           const publicKeyHex = keys.accountHex();
           const accountInfo = await rpc.stateGetAccountInfo(publicKeyHex);
           const namedKeys = accountInfo.Account?.namedKeys || accountInfo.namedKeys || [];
-          const found = namedKeys.find(k => k.name === 'casper_dao_contract');
+          const found = namedKeys.find(k => k.name === 'casper_dao_contract_v3');
           
           if (found) {
               console.log(`Found named key: ${found.key}`);

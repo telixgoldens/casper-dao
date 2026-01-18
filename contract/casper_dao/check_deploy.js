@@ -1,6 +1,5 @@
 const { CasperClient } = require("casper-js-sdk");
 
-// Nodes to try (same as deploy script)
 const NODES = [
   "http://157.90.182.214:7777/rpc",
   "http://95.217.109.99:7777/rpc",
@@ -22,11 +21,9 @@ if (!hash) {
     process.stdout.write(`Trying ${node} ... `);
     const client = new CasperClient(node);
     try {
-      // Check node status
       const status = await client.nodeClient.getStatus();
       console.log("node OK");
 
-      // Try a few different ways to fetch deploy info and show raw output
       try {
         const deploy = await client.getDeploy(hash);
         console.log("getDeploy result:", JSON.stringify(deploy, null, 2));
