@@ -9,7 +9,7 @@ const {
 
 const NODES = [
   "http://65.109.83.79:7777/rpc",
-  "https://node.testnet.casper.network/rpc",
+  "https://node.testnet.casper.neatwork/rpc",
   "http://157.90.182.214:7777/rpc",
   "http://95.217.109.99:7777/rpc",
   "http://65.108.236.83:7777/rpc"
