@@ -33,7 +33,7 @@ export default function CreateDAO({ onDeploy }) {
       name: "",
       description: "",
       tokenAddress:
-        "hash-876899abd9c79c58809b095dadb1a1735ec3dbad58337794cfedc198dd8fd517",
+        "hash-92a2dd97639d61dcb8460e512032a7de561f61b735cec478c474afc926123990",
     },
   });
 
@@ -223,7 +223,6 @@ export default function CreateDAO({ onDeploy }) {
                 >
                   {isDeploying ? (
                     <span className="flex items-center justify-center gap-2">
-                      <span className="animate-spin">⚙️</span>
                       Deploying to Blockchain...
                     </span>
                   ) : !activeKey ? (

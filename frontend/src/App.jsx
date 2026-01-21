@@ -6,7 +6,8 @@ import CreateDAO from "./page/CreateDAO";
 import { deployVote } from "./utils/casperService";
 import Footer from "./component/Footer";
 import ActiveDAOs from "./component/ActiveDaos";
-
+import CreateProposal from "./page/CreateProposal";
+import DaoDashboard from "./component/DaoDashboard";
 
 const DAO_ID = "123";
 const PROPOSAL_ID = "1";
@@ -16,6 +17,7 @@ function App() {
     useCasper();
   const [activeTab, setActiveTab] = useState("create");
   const [isVoting, setIsVoting] = useState(false);
+  const [selectedDaoId, setSelectedDaoId] = useState("");
 
   const handleVote = async (choice) => {
     if (!activeKey) return alert("Connect Wallet first!");
@@ -39,10 +41,10 @@ function App() {
   }
 
   const mainBg =
-    activeTab === "create" ? "bg-nebula bg-grid-texture" : "bg-slate-900";
-
+    activeTab === "create" || activeTab === "create-proposal"
+      ? "bg-nebula bg-grid-texture"
+      : "bg-slate-900";
   return (
-    
     <div
       className={`min-h-screen ${mainBg} text-white font-sans selection:bg-teal-500 selection:text-black`}
     >
@@ -88,6 +90,27 @@ function App() {
             Create DAO
           </button>
           <button
+            onClick={() => setActiveTab("create-proposal")}
+            className={`pb-2 px-2 nav-active ${
+              activeTab === "create-proposal"
+                ? "text-teal-400 border-b-2 border-teal-400"
+                : "text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            Create Proposal
+          </button>
+
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`pb-2 px-2 nav-active ${
+              activeTab === "dashboard"
+                ? "text-teal-400 border-b-2 border-teal-400"
+                : "text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            DAO Dashboard
+          </button>
+          <button
             onClick={() => setActiveTab("vote")}
             className={`pb-2 px-2 nav-active ${
               activeTab === "vote"
@@ -98,13 +121,42 @@ function App() {
             Active Proposals
           </button>
         </div>
-        <div className=" container">
+        <div className="container">
           <div className="">
-            {activeTab === "create" ? (
-              <CreateDAO />
-            ) : (
-            <ActiveDAOs />
+            {activeTab === "create" && <CreateDAO />}
+
+            {activeTab === "create-proposal" && <CreateProposal />}
+
+            {activeTab === "dashboard" && (
+              <div className="space-y-6">
+                {/* DAO ID Input */}
+                <div className="bg-[#071022]/70 backdrop-blur-md p-6 rounded-2xl border border-cyan-500/12">
+                  <label className="text-sm font-bold text-slate-400 mb-2 block">
+                    Enter DAO ID to view dashboard:
+                  </label>
+                  <input
+                    type="text"
+                    value={selectedDaoId}
+                    onChange={(e) => setSelectedDaoId(e.target.value)}
+                    placeholder="e.g. 1234567890"
+                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                  />
+                </div>
+
+                {/* Dashboard */}
+                {selectedDaoId && <DaoDashboard daoId={selectedDaoId} />}
+
+                {!selectedDaoId && (
+                  <div className="bg-[#071022]/70 backdrop-blur-md p-12 rounded-3xl text-center border border-cyan-500/12">
+                    <p className="text-slate-400">
+                      Enter a DAO ID above to view its dashboard
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
+
+            {activeTab === "vote" && <ActiveDAOs />}
           </div>
         </div>
       </main>
