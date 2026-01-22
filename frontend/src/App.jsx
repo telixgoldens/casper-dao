@@ -10,7 +10,6 @@ import CreateProposal from "./page/CreateProposal";
 import DaoDashboard from "./component/DaoDashboard";
 import DaoDetailPage from "./page/DaoDetailPage";
 
-// Main Dashboard Component (what you currently have)
 function MainDashboard() {
   const { activeKey, disconnectWallet } = useCasper();
   const [activeTab, setActiveTab] = useState("vote");
@@ -152,10 +151,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Main dashboard with tabs */}
         <Route path="/" element={<MainDashboard />} />
-        
-        {/* DAO Detail Page */}
         <Route path="/dao/:daoId" element={<DaoDetailPage />} />
       </Routes>
     </Router>
