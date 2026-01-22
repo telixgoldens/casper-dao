@@ -154,7 +154,7 @@ export const deployCreateProposal = async (
         daoId,
         title,
         description,
-        votingDuration,
+        votingDuration: votingDuration.toString(),
         userPublicKey
       })
     });
