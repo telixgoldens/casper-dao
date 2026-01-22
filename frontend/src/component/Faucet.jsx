@@ -114,14 +114,14 @@ export default function Faucet() {
           </div>
           {copied && (
             <p className="text-green-400 text-xs mt-2">
-              ✓ Copied to clipboard!
+              Copied to clipboard!
             </p>
           )}
         </div>
         <button
           onClick={handleClaim}
           disabled={claiming || claimStatus === 'success'}
-          className={`w-full py-4 rounded-xl font-bold text-lg tracking-wide transition-all duration-300 mb-4 ${
+          className={`w-full py-4 rounded-xl btn-deploy text-white font-bold text-lg tracking-wide transition-all duration-300 mb-4 ${
             claiming
               ? 'bg-slate-700 text-slate-400 cursor-wait'
               : claimStatus === 'success'
@@ -201,7 +201,7 @@ export default function Faucet() {
           </h4>
           <div className="space-y-1 text-sm">
             <p className="text-slate-300">
-              <strong className="text-purple-300">Amount:</strong> 100 DAOT per claim
+              <strong className="text-purple-300">Amount:</strong> 100 DGOT per claim
             </p>
             <p className="text-slate-300">
               <strong className="text-purple-300">Cooldown:</strong> 24 hours

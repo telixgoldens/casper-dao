@@ -54,30 +54,30 @@ export default function DaoDashboard({ daoId }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="">
       <div className="bg-[#071022]/70 backdrop-blur-md p-8 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden border border-cyan-500/12">
         <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
         
         <div className="pt-3">
-          <h2 className="text-3xl font-extrabold text-white mb-2">{daoData.name}</h2>
+          <h2 className="text-3xl font-extrabold text-white ps-2 mb-2">{daoData.name}</h2>
           {daoData.description && (
-            <p className="text-slate-300 text-sm mb-4">{daoData.description}</p>
+            <p className="text-slate-300 text-sm">{daoData.description}</p>
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-            <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+            <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700">
               <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">DAO ID</p>
               <p className="text-white font-bold text-lg">{daoData.dao_id}</p>
             </div>
             
-            <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+            <div className="bg-slate-900/50 rounded-xl p-3">
               <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Creator</p>
               <p className="text-white font-mono text-sm">
                 {daoData.creator?.substring(0, 10)}...{daoData.creator?.substring(daoData.creator.length - 8)}
               </p>
             </div>
             
-            <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+            <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700">
               <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Token</p>
               <p className="text-cyan-400 font-mono text-xs break-all">
                 {daoData.token_address?.substring(0, 20)}...
@@ -87,45 +87,42 @@ export default function DaoDashboard({ daoId }) {
         </div>
       </div>
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4">
           <div className="bg-[#071022]/70 backdrop-blur-md p-6 rounded-2xl border border-cyan-500/12">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center ps-1 gap-2">
               <FaUsers className="text-cyan-400 text-2xl" />
-              <p className="text-slate-400 text-sm">Total Members</p>
+              <p className="text-slate-400 pt-3 text-sm">Total Members</p>
             </div>
-            <p className="text-white font-bold text-3xl">{stats.memberCount || 0}</p>
+            <p className="text-white ps-1 font-bold text-3xl">{stats.memberCount || 0}</p>
           </div>
 
           <div className="bg-[#071022]/70 backdrop-blur-md p-6 rounded-2xl border border-blue-500/12">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 ps-1">
               <FaVoteYea className="text-blue-400 text-2xl" />
-              <p className="text-slate-400 text-sm">Total Votes</p>
+              <p className="text-slate-400 pt-3 text-sm">Total Votes</p>
             </div>
-            <p className="text-white font-bold text-3xl">{stats.totalVotes || 0}</p>
+            <p className="text-white ps-1 font-bold text-3xl">{stats.totalVotes || 0}</p>
           </div>
 
           <div className="bg-[#071022]/70 backdrop-blur-md p-6 rounded-2xl border border-purple-500/12">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 ps-1">
               <FaChartLine className="text-purple-400 text-2xl" />
-              <p className="text-slate-400 text-sm">Proposals</p>
+              <p className="text-slate-400 pt-3 text-sm">Proposals</p>
             </div>
-            <p className="text-white font-bold text-3xl">{stats.proposalCount || 0}</p>
+            <p className="text-white ps-1 font-bold text-3xl">{stats.proposalCount || 0}</p>
           </div>
-
           <div className="bg-[#071022]/70 backdrop-blur-md p-6 rounded-2xl border border-green-500/12">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 ps-1">
               <FaHistory className="text-green-400 text-2xl" />
-              <p className="text-slate-400 text-sm">Active Now</p>
+              <p className="text-slate-400 pt-3 text-sm">Active Now</p>
             </div>
-            <p className="text-white font-bold text-3xl">{stats.activeProposals || 0}</p>
+            <p className="text-white ps-1 font-bold text-3xl">{stats.activeProposals || 0}</p>
           </div>
         </div>
       )}
-      <div className="bg-[#071022]/70 backdrop-blur-md p-8 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden border border-cyan-500/12">
+      <div className=" backdrop-blur-md mt-4 rounded-3xl shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden border-cyan-500/12">
         <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
-        
-        <h3 className="text-2xl font-bold text-white mb-6 pt-3">Proposal History</h3>
-        
+        <h3 className="text-2xl bg-[#071022]/70 font-bold text-white p-2 border-bottom">Proposal History</h3>
         {proposals.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-slate-400">No proposals yet</p>
@@ -136,12 +133,12 @@ export default function DaoDashboard({ daoId }) {
             {proposals.map((proposal) => (
               <div 
                 key={proposal.proposal_id}
-                className="bg-slate-900/50 border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all"
+                className="bg-slate-900/50 border bg-[#071022]/70 border-slate-700 mt-3 rounded-xl p-6 hover:border-cyan-500/50 transition-all"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <h4 className="text-white font-bold text-lg mb-2">{proposal.title}</h4>
-                    <p className="text-slate-400 text-sm line-clamp-2">{proposal.description}</p>
+                  <div className="flex-1 ">
+                    <h4 className="text-white font-bold text-lg mt-2 ps-2">{proposal.title}</h4>
+                    <p className="text-slate-400 text-sm line-clamp-2 ps-2">{proposal.description}</p>
                   </div>
                   
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-4 ${
@@ -157,8 +154,8 @@ export default function DaoDashboard({ daoId }) {
 
                 <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-slate-700">
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Proposal ID</p>
-                    <p className="text-white font-mono text-sm">{proposal.proposal_id}</p>
+                    <p className="text-xs text-slate-500 mb-1 ps-2">Proposal ID</p>
+                    <p className="text-white font-mono text-sm ps-2">{proposal.proposal_id}</p>
                   </div>
                   
                   <div>
@@ -174,7 +171,7 @@ export default function DaoDashboard({ daoId }) {
 
                 {proposal.ai_summary && (
                   <div className="mt-4 bg-purple-500/10 border border-purple-500/30 rounded-lg p-3">
-                    <p className="text-xs text-purple-400 font-semibold mb-1">🤖 AI Summary</p>
+                    <p className="text-xs text-purple-400 font-semibold mb-1"> AI Summary</p>
                     <p className="text-slate-300 text-sm">{proposal.ai_summary}</p>
                   </div>
                 )}
@@ -194,9 +191,9 @@ export default function DaoDashboard({ daoId }) {
           </div>
         )}
       </div>
-      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-2xl p-6">
-        <h4 className="text-white font-bold text-lg mb-3">Quadratic Voting</h4>
-        <p className="text-slate-300 text-sm mb-3">
+      <div className="bg-[#071022]/70 bg-gradient-to-r mt-3 from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-2xl p-6">
+        <h4 className="text-white font-bold text-lg mb-3 ps-2">Quadratic Voting</h4>
+        <p className="text-slate-300 text-sm mb-3 ps-2">
           This DAO uses quadratic voting to prevent whale dominance. Your voting power is the 
           <strong className="text-cyan-400"> square root </strong> of your token balance.
         </p>

@@ -58,39 +58,77 @@ export const disconnectWallet = async () => {
   }
 };
 
-export const deployCreateDao = async (userPublicKey, daoName) => {
+export async function deployCreateDao(userPublicKey, name, description, tokenAddress, tokenType) {
   try {
-    if (!userPublicKey) {
-      throw new Error('Please connect your wallet first');
+    if (!window.CasperWalletProvider) {
+      throw new Error('Casper Wallet not found. Please install the Casper Wallet extension.');
     }
 
-    console.log('Sending create DAO request to backend...');
+    console.log('User:', userPublicKey);
+    console.log('DAO Name:', name);
+    console.log('Token:', tokenAddress);
+    console.log('Type:', tokenType);
 
-    const response = await fetch(`${BACKEND_URL}/deploy-create-dao`, {
+    console.log('Step 1: Preparing deploy...');
+    const prepareResponse = await fetch(`${BACKEND_URL}/prepare-create-dao`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        daoName: daoName,
-        userPublicKey: userPublicKey 
+        name,
+        description,
+        userPublicKey
       })
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to create DAO');
+    if (!prepareResponse.ok) {
+      const error = await prepareResponse.json();
+      throw new Error(error.error || 'Failed to prepare DAO creation');
     }
 
-    console.log('DAO creation successful. Deploy hash:', data.deployHash);
-    return data.deployHash;
+    const { deployJson } = await prepareResponse.json();
+    console.log('Deploy prepared successfully');
+    
+    console.log('Step 2: Requesting user signature...');
+    const provider = window.CasperWalletProvider();
+    
+    const signedDeployJson = await provider.sign(
+      JSON.stringify(deployJson),
+      userPublicKey
+    );
+    console.log('Deploy signed by user');
 
-  } catch (err) {
-    console.error('Create DAO error:', err);
-    throw new Error('Failed to create DAO: ' + err.message);
+    console.log('Step 3: Submitting to network...');
+    const submitResponse = await fetch(`${BACKEND_URL}/submit-signed-deploy`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        signedDeploy: signedDeployJson,
+        deployJson: deployJson,
+        daoData: {
+          name,
+          description,
+          tokenAddress,
+          tokenType
+        }
+      })
+    });
+
+    if (!submitResponse.ok) {
+      const error = await submitResponse.json();
+      throw new Error(error.error || 'Failed to submit DAO creation');
+    }
+
+    const result = await submitResponse.json();
+    console.log('DAO creation submitted!', result.deployHash);
+  
+    return result.deployHash;
+    
+  } catch (error) {
+    console.error('Create DAO error:', error);
+    throw error;
   }
-};
+}
+
 export const deployCreateProposal = async (
   userPublicKey, 
   daoId, 
@@ -165,7 +203,7 @@ export const deployCreateProposal = async (
   }
 };
 
-export async function deployVote(userPublicKey, daoId, proposalId, choice) { // ✅ Add proposalId param
+export async function deployVote(userPublicKey, daoId, proposalId, choice) { 
   try {
     if (!window.CasperWalletProvider) {
       throw new Error('Casper Wallet not found. Please install the Casper Wallet extension.');

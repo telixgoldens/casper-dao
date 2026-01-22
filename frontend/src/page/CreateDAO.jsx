@@ -32,6 +32,7 @@ export default function CreateDAO({ onDeploy }) {
     defaultValues: {
       name: "",
       description: "",
+      tokenType: "u256_address",
       tokenAddress:
         "hash-92a2dd97639d61dcb8460e512032a7de561f61b735cec478c474afc926123990",
     },
@@ -49,7 +50,10 @@ export default function CreateDAO({ onDeploy }) {
 
     setIsDeploying(true);
     try {
-      const deployHash = await deployCreateDao(activeKey, sanitizedName);
+      const deployHash = await deployCreateDao(activeKey, sanitizedName,
+      data.description,
+      data.tokenAddress,
+      data.tokenType);
 
       setAlertVariant("success");
       setAlertMessage(`DAO "${data.name}" submitted successfully.  You can monitor deployment status on Casper Live. Deploy Hash:
@@ -71,7 +75,7 @@ export default function CreateDAO({ onDeploy }) {
   return (
     <section className="min-h-screen bg-nebula bg-grid-texture flex items-start pt-28 pb-24">
       <div className="hero-container w-full">
-        <div className="max-w-6xl mx-auto ">
+        <div className="max-w-6xl mx-auto bg-[#071022]/70 ">
           <div className=" backdrop-blur-md border border-cyan-500/12 shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden">
             <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
             {showAlert && (

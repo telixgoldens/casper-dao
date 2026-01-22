@@ -1,56 +1,32 @@
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import LandingPage from "./page/LandingPage";
 import { useCasper } from "./context/CasperContext";
 import { FaSignOutAlt, FaGhost } from "react-icons/fa";
 import CreateDAO from "./page/CreateDAO";
-import { deployVote } from "./utils/casperService";
 import Footer from "./component/Footer";
 import ActiveDAOs from "./component/ActiveDaos";
 import CreateProposal from "./page/CreateProposal";
 import DaoDashboard from "./component/DaoDashboard";
+import DaoDetailPage from "./page/DaoDetailPage";
 
-const DAO_ID = "123";
-const PROPOSAL_ID = "1";
-
-function App() {
-  const { activeKey, isConnected, connectWallet, disconnectWallet } =
-    useCasper();
-  const [activeTab, setActiveTab] = useState("create");
-  const [isVoting, setIsVoting] = useState(false);
+// Main Dashboard Component (what you currently have)
+function MainDashboard() {
+  const { activeKey, disconnectWallet } = useCasper();
+  const [activeTab, setActiveTab] = useState("vote");
   const [selectedDaoId, setSelectedDaoId] = useState("");
-
-  const handleVote = async (choice) => {
-    if (!activeKey) return alert("Connect Wallet first!");
-
-    if (!confirm(`Vote ${choice ? "YES" : "NO"}? This will cost ~150 CSPR.`))
-      return;
-
-    setIsVoting(true);
-    try {
-      const hash = await deployVote(activeKey, DAO_ID, choice);
-      alert(`Vote Submitted!\nHash: ${hash}`);
-    } catch (err) {
-      alert("Vote Failed: " + err.message);
-    } finally {
-      setIsVoting(false);
-    }
-  };
-
-  if (!isConnected) {
-    return <LandingPage onConnect={connectWallet} />;
-  }
 
   const mainBg =
     activeTab === "create" || activeTab === "create-proposal"
       ? "bg-nebula bg-grid-texture"
       : "bg-slate-900";
+
   return (
     <div
       className={`min-h-screen ${mainBg} text-white font-sans selection:bg-teal-500 selection:text-black`}
     >
-      <nav className="border-b border-gray-800 backdrop-blur-md sticky top-0 z-50  py-4 flex justify-between items-center nav-header">
+      <nav className="border-b border-gray-800 backdrop-blur-md sticky top-0 z-50 py-4 flex justify-between items-center nav-header">
         <div
-          onClick={disconnectWallet}
           className="text-xl font-bold flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
         >
           <FaGhost className="text-cyan-400 text-xl group-hover:text-white" />
@@ -71,14 +47,26 @@ function App() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto p-8  pt-3 bg-grid-texture">
+      <main className="max-w-6xl mx-auto p-8 pt-3 bg-grid-texture">
         <div className="mb-10 container">
           <h1 className="text-3xl font-bold mb-2">Governance Dashboard</h1>
           <p className="text-gray-400">
             Manage your DAOs and participate in active votes.
           </p>
         </div>
+        
         <div className="flex gap-6 border-b border-gray-800 mb-8 container">
+          <button
+            onClick={() => setActiveTab("vote")}
+            className={`pb-2 px-2 nav-active ${
+              activeTab === "vote"
+                ? "text-teal-400 border-b-2 border-teal-400"
+                : "text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            Active DAOs
+          </button>
+          
           <button
             onClick={() => setActiveTab("create")}
             className={`pb-2 px-2 nav-active ${
@@ -89,6 +77,7 @@ function App() {
           >
             Create DAO
           </button>
+          
           <button
             onClick={() => setActiveTab("create-proposal")}
             className={`pb-2 px-2 nav-active ${
@@ -110,28 +99,20 @@ function App() {
           >
             DAO Dashboard
           </button>
-          <button
-            onClick={() => setActiveTab("vote")}
-            className={`pb-2 px-2 nav-active ${
-              activeTab === "vote"
-                ? "text-teal-400 border-b-2 border-teal-400"
-                : "text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            Active Proposals
-          </button>
         </div>
+        
         <div className="container">
           <div className="">
+            {activeTab === "vote" && <ActiveDAOs />}
+            
             {activeTab === "create" && <CreateDAO />}
 
             {activeTab === "create-proposal" && <CreateProposal />}
 
             {activeTab === "dashboard" && (
-              <div className="space-y-6">
-                {/* DAO ID Input */}
-                <div className="bg-[#071022]/70 backdrop-blur-md p-6 rounded-2xl border border-cyan-500/12">
-                  <label className="text-sm font-bold text-slate-400 mb-2 block">
+              <div className="hero-container">
+                <div className="bg-[#071022]/70 backdrop-blur-md  rounded-2xl border border-cyan-500/12">
+                  <label className="text-sm font-bold text-slate-400 ps-2 mt-2 block">
                     Enter DAO ID to view dashboard:
                   </label>
                   <input
@@ -139,29 +120,45 @@ function App() {
                     value={selectedDaoId}
                     onChange={(e) => setSelectedDaoId(e.target.value)}
                     placeholder="e.g. 1234567890"
-                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                   />
                 </div>
-
-                {/* Dashboard */}
                 {selectedDaoId && <DaoDashboard daoId={selectedDaoId} />}
 
                 {!selectedDaoId && (
-                  <div className="bg-[#071022]/70 backdrop-blur-md p-12 rounded-3xl text-center border border-cyan-500/12">
-                    <p className="text-slate-400">
+                  <div className="bg-[#071022]/70 backdrop-blur-md pt-2 rounded-3xl text-center border border-cyan-500/12">
+                    <p className="text-slate-400 ps-2">
                       Enter a DAO ID above to view its dashboard
                     </p>
                   </div>
                 )}
               </div>
             )}
-
-            {activeTab === "vote" && <ActiveDAOs />}
           </div>
         </div>
       </main>
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  const { isConnected, connectWallet } = useCasper();
+
+  if (!isConnected) {
+    return <LandingPage onConnect={connectWallet} />;
+  }
+
+  return (
+    <Router>
+      <Routes>
+        {/* Main dashboard with tabs */}
+        <Route path="/" element={<MainDashboard />} />
+        
+        {/* DAO Detail Page */}
+        <Route path="/dao/:daoId" element={<DaoDetailPage />} />
+      </Routes>
+    </Router>
   );
 }
 

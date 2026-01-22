@@ -164,8 +164,8 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
 
   return (
     <section className="min-h-screen bg-nebula bg-grid-texture flex items-start pt-28 pb-24">
-      <div className="hero-container w-full">
-        <div className="max-w-6xl mx-auto">
+      <div className="hero-container w-full ">
+        <div className="max-w-6xl mx-auto bg-[#071022]/70">
           <div className="backdrop-blur-md border border-cyan-500/12 shadow-[0_30px_80px_rgba(6,182,212,0.04)] relative overflow-hidden">
             <div className="absolute top-6 left-8 right-8 h-1 rounded-full bg-gradient-to-r from-cyan-400/40 via-blue-400/20 to-purple-500/25" />
             
@@ -177,7 +177,7 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
 
             {activeKey && (
               <div className="mb-6 pt-3 bg-green-500/10 border border-green-500/30 rounded-xl p-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 ">
                   <FaCheckCircle className="text-green-400 text-xl" />
                   <div>
                     <p className="text-white font-semibold text-sm">Wallet Connected</p>
@@ -213,7 +213,7 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-[#071022]/70">
               <div className="space-y-2 px-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Select DAO *
@@ -224,7 +224,7 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
                   })}
                   value={selectedDao}
                   onChange={(e) => setSelectedDao(e.target.value)}
-                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all"
+                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all"
                 >
                   <option value="">-- Select a DAO --</option>
                   {daos.map((dao) => (
@@ -237,7 +237,7 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
                   <p className="text-xs text-rose-400 mt-1">{errors.daoId.message}</p>
                 )}
               </div>
-              <div className="space-y-2 px-2">
+              <div className="space-y-2 px-2 mt-3">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Proposal Title *
                 </label>
@@ -253,14 +253,14 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
                       message: "Title must be less than 200 characters",
                     },
                   })}
-                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-slate-600"
+                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-slate-600"
                   placeholder="e.g. Allocate 10,000 tokens to marketing fund"
                 />
                 {errors.title && (
                   <p className="text-xs text-rose-400 mt-1">{errors.title.message}</p>
                 )}
               </div>
-              <div className="space-y-2 pt-3 px-2">
+              <div className="space-y-2 pt-3 px-2 mt-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Proposal Description *
                 </label>
@@ -277,7 +277,7 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
                     },
                   })}
                   rows="6"
-                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-slate-600 resize-none"
+                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-slate-600 resize-none"
                   placeholder="Provide detailed information about your proposal, including rationale, expected outcomes, and implementation details..."
                 />
                 {errors.description && (
@@ -287,7 +287,7 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
                   type="button"
                   onClick={generateAISummary}
                   disabled={generatingSummary || !description || description.length < 20}
-                  className={`mt-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                  className={`mt-3 px-4 py-2 rounded-lg btn-deploy text-white font-semibold text-sm transition-all ${
                     generatingSummary || !description || description.length < 20
                       ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] text-white'
@@ -311,13 +311,13 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
                   </div>
                 )}
               </div>
-              <div className="space-y-2 px-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <div className="space-y-2 px-2 mt-3">
+                <label className="text-xs font-bold text-white uppercase tracking-wider">
                   Voting Duration *
                 </label>
                 <select
                   {...register("votingDuration")}
-                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all"
+                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-dark focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all"
                 >
                   <option value="3600000">1 hour</option>
                   <option value="21600000">6 hours</option>
@@ -345,7 +345,7 @@ export default function CreateProposal({ daoId, onProposalCreated }) {
                 <button
                   type="submit"
                   disabled={!activeKey || isDeploying}
-                  className={`w-full py-4 rounded-2xl font-bold text-lg tracking-wide uppercase transition-all duration-300 ${
+                  className={`w-full py-4 rounded-2xl font-bold text-white btn-deploy text-lg tracking-wide uppercase transition-all duration-300 ${
                     !activeKey
                       ? "bg-slate-700 text-slate-400 cursor-not-allowed"
                       : isDeploying

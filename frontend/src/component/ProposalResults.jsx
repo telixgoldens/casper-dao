@@ -76,11 +76,9 @@ export default function ProposalResults({ daoId, proposalId }) {
   }, [daoId, proposalId]);
 
   const handleVote = async (choice) => {
-    console.log("=== VOTING DEBUG ===");
     console.log("DAO ID:", daoId);
     console.log("Proposal ID:", proposalId);
     console.log("Choice:", choice);
-    console.log("===================");
     if (!activeKey) {
       setAlertVariant("warning");
       setAlertMessage("Please connect your wallet to vote.");
@@ -143,7 +141,7 @@ export default function ProposalResults({ daoId, proposalId }) {
 
   return (
     <div className="">
-      <h3 className="text-lg font-bold mb-4 pt-3">Live Results</h3>
+      <h3 className="text-lg font-bold mb-4 pt-3 ps-2">Live Results</h3>
 
       {showAlert && (
         <Alert variant={alertVariant} onClick={() => setShowAlert(false)}>
@@ -152,7 +150,7 @@ export default function ProposalResults({ daoId, proposalId }) {
       )}
 
       {stats && (
-        <div className="mb-6 space-y-3">
+        <div className="mb-6 space-y-3 px-2">
           <div className="flex justify-between text-sm">
             <span>Total Votes:</span>
             <span className="font-bold">{stats.total}</span>
@@ -227,7 +225,7 @@ export default function ProposalResults({ daoId, proposalId }) {
         )}
       </div>
 
-      <div className="mt-3">
+      <div className="mt-3 px-2">
         <h4 className="font-semibold mb-3">
           Recent Votes (Blockchain Explorer)
         </h4>
@@ -238,7 +236,7 @@ export default function ProposalResults({ daoId, proposalId }) {
         ) : (
           <ul className="space-y-2">
             {votes.map((v) => (
-              <li key={v.deploy_hash} className="text-sm border-b pb-1 pt-1">
+              <li key={v.deploy_hash} className="text-sm border-b  pb-1 pt-1">
                 <div className="flex items-center justify-between">
                   <div>
                     <span
