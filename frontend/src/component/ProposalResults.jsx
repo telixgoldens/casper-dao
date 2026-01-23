@@ -6,10 +6,6 @@ import Alert from "react-bootstrap/Alert";
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:3001";
 
 export default function ProposalResults({ daoId, proposalId }) {
-  console.log("ProposalResults props:", { daoId, proposalId });
-  console.log("🔍 ProposalResults received:");
-  console.log("  daoId:", daoId, "(type:", typeof daoId + ")");
-  console.log("  proposalId:", proposalId, "(type:", typeof proposalId + ")");
   const { activeKey } = useCasper();
   const [votes, setVotes] = useState([]);
   const [stats, setStats] = useState(null);
@@ -32,27 +28,31 @@ export default function ProposalResults({ daoId, proposalId }) {
   }, [showAlert]);
 
   useEffect(() => {
-    const checkIfVoted = async () => {
-      if (!activeKey || !daoId) {
-        setCheckingVote(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `${API_URL}/has-voted/${daoId}/${activeKey}`,
-        );
-        const data = await response.json();
-        setHasVoted(data.hasVoted);
-      } catch (err) {
-        console.error("Error checking vote status:", err);
-      } finally {
-        setCheckingVote(false);
-      }
-    };
-
     checkIfVoted();
-  }, [activeKey, daoId]);
+  }, [activeKey, proposalId]); 
+
+  const checkIfVoted = async () => {
+    if (!activeKey) {
+      setCheckingVote(false); 
+      setHasVoted(false);
+      return;
+    }
+    
+    setCheckingVote(true); 
+    
+    try {
+      const response = await fetch(
+        `${API_URL}/has-voted/${daoId}/${proposalId}/${activeKey}` 
+      );
+      const data = await response.json();
+      setHasVoted(data.hasVoted);
+    } catch (err) {
+      console.error("Error checking vote status:", err);
+      setHasVoted(false);
+    } finally {
+      setCheckingVote(false); 
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,9 +76,6 @@ export default function ProposalResults({ daoId, proposalId }) {
   }, [daoId, proposalId]);
 
   const handleVote = async (choice) => {
-    console.log("DAO ID:", daoId);
-    console.log("Proposal ID:", proposalId);
-    console.log("Choice:", choice);
     if (!activeKey) {
       setAlertVariant("warning");
       setAlertMessage("Please connect your wallet to vote.");
@@ -88,26 +85,25 @@ export default function ProposalResults({ daoId, proposalId }) {
 
     if (hasVoted) {
       setAlertVariant("warning");
-      setAlertMessage("You have already voted on this DAO.");
+      setAlertMessage("You have already voted on this proposal."); 
       setShowAlert(true);
       return;
     }
 
     setIsVoting(true);
     try {
-      const deployHash = await deployVote(activeKey,  daoId, proposalId, choice);
+      const deployHash = await deployVote(activeKey, daoId, proposalId, choice);
 
       setAlertVariant("success");
       setAlertMessage(
-        `Vote Submitted!\n\nChoice: ${choice ? "YES" : "NO"}\nDeploy Hash: ${deployHash}\n\nYour vote will appear in ~1 minute.`,
+        `Vote Submitted!\n\nChoice: ${choice ? "YES" : "NO"}\nDeploy Hash: ${deployHash}\n\nYour vote will appear in ~1 minute.`
       );
       setShowAlert(true);
       setHasVoted(true);
+
       setTimeout(async () => {
         try {
-          const statRes = await fetch(
-            `${API_URL}/stats/${daoId}/${proposalId}`,
-          );
+          const statRes = await fetch(`${API_URL}/stats/${daoId}/${proposalId}`);
           const statData = await statRes.json();
           setStats(statData);
         } catch (err) {
@@ -195,7 +191,7 @@ export default function ProposalResults({ daoId, proposalId }) {
           </div>
         ) : hasVoted ? (
           <div className="bg-green-100 border border-green-400 rounded p-3 text-center text-sm text-green-700 vote-yes">
-            You have already voted on this DAO
+            You have already voted on this proposal 
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -236,7 +232,7 @@ export default function ProposalResults({ daoId, proposalId }) {
         ) : (
           <ul className="space-y-2">
             {votes.map((v) => (
-              <li key={v.deploy_hash} className="text-sm border-b  pb-1 pt-1">
+              <li key={v.deploy_hash} className="text-sm border-b pb-1 pt-1">
                 <div className="flex items-center justify-between">
                   <div>
                     <span
