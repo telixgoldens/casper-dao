@@ -52,8 +52,30 @@ export default function DaoDetailPage() {
 
   if (loading) {
     return (
-      <section className="min-h-screen bg-nebula bg-grid-texture flex items-center justify-center pt-28">
+      <section >
+         <nav className="border-b border-gray-800 backdrop-blur-md sticky top-0 z-50 py-4 flex justify-between items-center nav-header">
+        <div className="text-xl font-bold flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+          <FaGhost className="text-cyan-400 text-xl group-hover:text-white" />
+          <span className="text-teal-400">Casper</span>DAO
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-400 bg-slate-800 px-3 py-1 rounded-full border border-gray-700 font-mono">
+            {activeKey?.slice(0, 10)}...{activeKey?.slice(-4)}
+          </span>
+          <div className="w-3 h-3 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)] animate-pulse"></div>
+          <button
+            onClick={disconnectWallet}
+            className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all"
+            title="Disconnect Wallet"
+          >
+            <FaSignOutAlt size={18} />
+          </button>
+        </div>
+      </nav>
+        <div className="min-h-screen bg-nebula bg-grid-texture flex items-center justify-center pt-28">
+       
         <div className="text-white text-xl">Loading DAO details...</div>
+        </div>
       </section>
     );
   }
